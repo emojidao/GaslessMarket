@@ -39,7 +39,6 @@ contract Bank721 is Bank, W4907Factory, IBank721 {
         }
     }
 
-    //TODO 未考虑mint vNFT的情况
     function redeemNFT721(
         TokenType tokenType,
         address oNFT,
