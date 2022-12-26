@@ -119,7 +119,7 @@ contract RentalMarket1155 is BaseRentalMarket, IRentalMarket1155 {
             msg.sender,
             rentOffer.maker
         );
-        cancelledOrFulfilledOrder[offerHash] = true;
+        cancelledOrFulfilled[offerHash] = true;
 
         emit RentOfferFulfilled(
             offerHash,

@@ -109,7 +109,7 @@ contract RentalMarket721 is BaseRentalMarket, IRentalMarket721 {
             msg.sender,
             rentOffer.maker
         );
-        cancelledOrFulfilledOrder[offerHash] = true;
+        cancelledOrFulfilled[offerHash] = true;
         emit RentOfferFulfilled(
             offerHash,
             rentOffer.nft,

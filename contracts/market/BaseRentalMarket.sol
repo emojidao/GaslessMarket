@@ -24,7 +24,7 @@ abstract contract BaseRentalMarket is
     EIP712
 {
     /* Storage */
-    mapping(bytes32 => bool) internal cancelledOrFulfilledOrder;
+    mapping(bytes32 => bool) internal cancelledOrFulfilled;
     mapping(address => uint256) internal nonces;
     mapping(address => address) internal bandMap;
     address internal _baseBank;
@@ -53,10 +53,25 @@ abstract contract BaseRentalMarket is
         bandMap[oNFT] = bank;
     }
 
-    function cancelOrder(bytes32 hash) external {
-        require(!cancelledOrFulfilledOrder[hash], "Be cancelled or fulfilled already");
-        cancelledOrFulfilledOrder[hash] = true;
+    function _cancelOrderOrOffer(bytes32 hash) internal {
+        require(
+            !cancelledOrFulfilled[hash],
+            "Be cancelled or fulfilled already"
+        );
+        cancelledOrFulfilled[hash] = true;
         emit OrderCancelled(hash);
+    }
+
+    function cancelLendOrder(LendOrder calldata lendOrder) public {
+        require(msg.sender == lendOrder.maker);
+        bytes32 orderHash = _hashStruct_LendOrder(lendOrder);
+        _cancelOrderOrOffer(orderHash);
+    }
+
+    function cancelRentOffer(RentOffer calldata rentOffer) public {
+        require(msg.sender == rentOffer.maker);
+        bytes32 offerHash = _hashStruct_RentOffer(rentOffer);
+        _cancelOrderOrOffer(offerHash);
     }
 
     /**
@@ -120,7 +135,10 @@ abstract contract BaseRentalMarket is
     ) internal view {
         require(taker == address(0) || taker == msg.sender, "invalid taker");
         require(nonce == nonces[maker], "nonce already expired");
-        require(!cancelledOrFulfilledOrder[orderHash], "Be cancelled or fulfilled already");
+        require(
+            !cancelledOrFulfilled[orderHash],
+            "Be cancelled or fulfilled already"
+        );
     }
 
     function _validateMetadata(NFT calldata nft, Metadata calldata metadata)

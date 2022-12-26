@@ -362,8 +362,8 @@ describe("TestMarket 721", function () {
                 signature:sig.compact,
                 signatureVersion: SignatureVersion.EIP712
             }
-            let orderHash = typedDataEncoder_lendOrder.hashStruct('LendOrder', lendOrder);
-            await market.connect(renterA).cancelOrder(orderHash);
+            // let orderHash = typedDataEncoder_lendOrder.hashStruct('LendOrder', lendOrder);
+            await market.connect(ownerOfNFT).cancelLendOrder(lendOrder);
             if (lendOrder.price.paymentToken == ethers.constants.AddressZero) {
                 await expect(market.connect(renterA).fulfillLendOrder721(lendOrder, iSig, 10, { value: ethers.utils.parseEther('10') })).to.be.revertedWith("Be cancelled or fulfilled already");
             } else {
@@ -501,8 +501,8 @@ describe("TestMarket 721", function () {
                 signature:sig.compact,
                 signatureVersion: SignatureVersion.EIP712
             }
-            let offerHash = typedDataEncoder_rentOffer.hashStruct('RentOffer', rentOffer_A);
-            await market.connect(renterA).cancelOrder(offerHash);
+            // let offerHash = typedDataEncoder_rentOffer.hashStruct('RentOffer', rentOffer_A);
+            await market.connect(renterA).cancelRentOffer(rentOffer_A);
             await expect(market.connect(ownerOfNFT).fulfillRentOffer721(rentOffer_A, iSig, ethers.constants.MaxUint256)).to.be.revertedWith("Be cancelled or fulfilled already");
 
         });
