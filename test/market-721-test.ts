@@ -606,6 +606,12 @@ describe("TestMarket 721", function () {
             await bank.connect(ownerOfNFT).redeemNFT721(TokenType.ERC721, testERC721.address, firstTokenId);
             expect(await testERC721.ownerOf(firstTokenId)).equal(ownerOfNFT.address);
         });
+        it("redeemAndCancleLendOrder should success if user is expired", async function () {
+            await hre.network.provider.send("hardhat_mine", ["0x15180", "0xb"]);//86400 * 11
+            await market.connect(ownerOfNFT).redeemAndCancleLendOrder(lendOrder);
+            expect(await testERC721.ownerOf(firstTokenId)).equal(ownerOfNFT.address);
+        });
+
         it("redeem should failed if user isn't expired", async function () {
             await expect(bank.connect(ownerOfNFT).redeemNFT721(TokenType.ERC721, testERC721.address, firstTokenId)).to.be.revertedWith("cannot redeem now");
         });

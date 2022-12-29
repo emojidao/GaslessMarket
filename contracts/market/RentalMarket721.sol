@@ -42,7 +42,7 @@ contract RentalMarket721 is BaseRentalMarket, IRentalMarket721 {
         uint256 rentExpiry = block.timestamp + duration;
         require(rentExpiry <= lendOrder.maxRentExpiry, "invalid RentExpiry");
         require(rentExpiry < lendOrder.durationId, "invalid durationId");
-        
+
         IBank721(bankOf(lendOrder.nft.token)).setUser(
             lendOrder.nft,
             lendOrder.maker,
@@ -118,6 +118,15 @@ contract RentalMarket721 is BaseRentalMarket, IRentalMarket721 {
             rentOffer.cycleAmount,
             msg.sender,
             rentOffer.maker
+        );
+    }
+
+    function redeemAndCancleLendOrder(LendOrder calldata lendOrder) public {
+        cancelLendOrder(lendOrder);
+        IBank721(bankOf(lendOrder.nft.token)).redeemNFT721(
+            lendOrder.nft.tokenType,
+            lendOrder.nft.token,
+            lendOrder.nft.tokenId
         );
     }
 }
