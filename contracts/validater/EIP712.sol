@@ -1,18 +1,20 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.13;
 
-import "@openzeppelin/contracts/utils/cryptography/SignatureChecker.sol";
 import {LendOrder, RentalPrice, RentOffer} from "../constant/RentalStructs.sol";
 import {NFT, Fee, SignatureVersion, Signature, Metadata} from "../constant/BaseStructs.sol";
 import {SignatureVerificationErrors} from "./SignatureVerificationErrors.sol";
 import {EIP1271Interface} from "./EIP1271Interface.sol";
-import "./ConsiderationConstants.sol";
 
 /**
  * @title EIP712
  * @dev Contains all of the order hashing functions for EIP712 compliant signatures
  */
 contract EIP712 is SignatureVerificationErrors {
+    // Signature-related
+    bytes32 constant EIP2098_allButHighestBitMask = (
+        0x7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+    );
     bytes32 public constant NFT_TYPEHASH =
         keccak256(
             "NFT(uint8 tokenType,address token,uint256 tokenId,uint256 amount)"
