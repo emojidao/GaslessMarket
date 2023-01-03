@@ -16,11 +16,14 @@ contract Bank1155 is Bank, W5006Factory, ERC1155Receiver, IBank1155 {
     //                  amount
     mapping(bytes32 => uint256) internal rentingMap;
 
-    constructor(
+    function initialize(
         address owner_,
         address admin_,
-        address wNFTImpl_
-    ) W5006Factory(owner_, admin_, wNFTImpl_) {}
+        address w5006Impl_
+    ) public initializer {
+        _initOwnable(owner_, admin_);
+        _initW5006(w5006Impl_);
+    }
 
     function _get5006(TokenType tokenType, address oNFT)
         internal

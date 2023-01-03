@@ -17,7 +17,8 @@ describe("Bank721", function () {
         let w4907 = await WrappedInERC4907Upgradeable.deploy();
 
         const Bank721 = await ethers.getContractFactory("Bank721");
-        bank = await Bank721.deploy(ownerOfMarket.address, adminOfMarket.address, w4907.address);
+        bank = await upgrades.deployProxy(Bank721, [ownerOfMarket.address, adminOfMarket.address, w4907.address], { unsafeAllow: ['delegatecall'] });
+
 
         const RentalMarket721 = await ethers.getContractFactory("RentalMarket721");
         market = await RentalMarket721.deploy();

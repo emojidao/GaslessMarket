@@ -46,7 +46,7 @@ describe("TestMarket 1155", function () {
         let w5006Impl = await WrappedInERC5006.deploy();
 
         const Bank1155 = await ethers.getContractFactory("Bank1155");
-        bank = await Bank1155.deploy(ownerOfMarket.address, adminOfMarket.address, w5006Impl.address);
+        bank = await upgrades.deployProxy(Bank1155, [ownerOfMarket.address, adminOfMarket.address, w5006Impl.address], { unsafeAllow: ['delegatecall'] });
 
         const RentalMarket1155 = await ethers.getContractFactory("RentalMarket1155");
         market = await RentalMarket1155.deploy();

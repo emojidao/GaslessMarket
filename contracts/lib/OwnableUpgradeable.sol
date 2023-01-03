@@ -10,7 +10,7 @@ contract OwnableUpgradeable {
     event NewOwner(address oldOwner, address newOwner);
     event NewPendingOwner(address oldPendingOwner, address newPendingOwner);
 
-    function initOwnableContract(address _owner, address _admin) internal {
+    function _initOwnable(address _owner, address _admin) internal {
         owner = _owner;
         admin = _admin;
     }

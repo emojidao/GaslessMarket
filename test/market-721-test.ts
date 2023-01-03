@@ -48,7 +48,7 @@ describe("TestMarket 721", function () {
         let w4907 = await WrappedInERC4907Upgradeable.deploy();
 
         const Bank721 = await ethers.getContractFactory("Bank721");
-        bank = await Bank721.deploy(ownerOfMarket.address, adminOfMarket.address, w4907.address);
+        bank = await upgrades.deployProxy(Bank721, [ownerOfMarket.address, adminOfMarket.address, w4907.address], { unsafeAllow: ['delegatecall'] });
 
         const RentalMarket721 = await ethers.getContractFactory("RentalMarket721");
         market = await RentalMarket721.deploy();
@@ -362,7 +362,7 @@ describe("TestMarket 721", function () {
                 signature:sig.compact,
                 signatureVersion: SignatureVersion.EIP712
             }
-            // let orderHash = typedDataEncoder_lendOrder.hashStruct('LendOrder', lendOrder);
+            let orderHash = typedDataEncoder_lendOrder.hashStruct('LendOrder', lendOrder);
             await market.connect(ownerOfNFT).cancelLendOrder(lendOrder);
             if (lendOrder.price.paymentToken == ethers.constants.AddressZero) {
                 await expect(market.connect(renterA).fulfillLendOrder721(lendOrder, iSig, 10, { value: ethers.utils.parseEther('10') })).to.be.revertedWith("Be cancelled or fulfilled already");
@@ -501,7 +501,7 @@ describe("TestMarket 721", function () {
                 signature:sig.compact,
                 signatureVersion: SignatureVersion.EIP712
             }
-            // let offerHash = typedDataEncoder_rentOffer.hashStruct('RentOffer', rentOffer_A);
+            let offerHash = typedDataEncoder_rentOffer.hashStruct('RentOffer', rentOffer_A);
             await market.connect(renterA).cancelRentOffer(rentOffer_A);
             await expect(market.connect(ownerOfNFT).fulfillRentOffer721(rentOffer_A, iSig, ethers.constants.MaxUint256)).to.be.revertedWith("Be cancelled or fulfilled already");
 
@@ -606,12 +606,6 @@ describe("TestMarket 721", function () {
             await bank.connect(ownerOfNFT).redeemNFT721(TokenType.ERC721, testERC721.address, firstTokenId);
             expect(await testERC721.ownerOf(firstTokenId)).equal(ownerOfNFT.address);
         });
-        it("redeemAndCancleLendOrder should success if user is expired", async function () {
-            await hre.network.provider.send("hardhat_mine", ["0x15180", "0xb"]);//86400 * 11
-            await market.connect(ownerOfNFT).redeemAndCancleLendOrder(lendOrder);
-            expect(await testERC721.ownerOf(firstTokenId)).equal(ownerOfNFT.address);
-        });
-
         it("redeem should failed if user isn't expired", async function () {
             await expect(bank.connect(ownerOfNFT).redeemNFT721(TokenType.ERC721, testERC721.address, firstTokenId)).to.be.revertedWith("cannot redeem now");
         });

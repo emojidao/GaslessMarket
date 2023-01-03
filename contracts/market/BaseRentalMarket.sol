@@ -36,7 +36,7 @@ abstract contract BaseRentalMarket is
         address baseBank_
     ) internal onlyInitializing {
         __ReentrancyGuard_init();
-        initOwnableContract(owner_, admin_);
+        _initOwnable(owner_, admin_);
         _baseBank = baseBank_;
         IBank(_baseBank).bindMarket(address(this));
         _hashDomain();
@@ -155,5 +155,5 @@ abstract contract BaseRentalMarket is
     }
 
     // required by the OZ UUPS module
-    function _authorizeUpgrade(address) internal override onlyOwner {}
+    function _authorizeUpgrade(address) internal override {}
 }

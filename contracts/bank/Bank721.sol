@@ -15,11 +15,14 @@ contract Bank721 is Bank, W4907Factory, IBank721 {
     mapping(address => mapping(uint256 => address)) public staked;
     mapping(bytes32 => Duration) public durations;
 
-    constructor(
+    function initialize(
         address owner_,
         address admin_,
-        address wNFTImpl_
-    ) W4907Factory(owner_, admin_, wNFTImpl_) {}
+        address w4907Impl_
+    ) public initializer {
+        _initOwnable(owner_, admin_);
+        _initW4907(w4907Impl_);
+    }
 
     function tryStakeNFT721(
         TokenType tokenType,
@@ -169,4 +172,6 @@ contract Bank721 is Bank, W4907Factory, IBank721 {
     {
         return interfaceId == type(IBank721).interfaceId;
     }
+
+    
 }

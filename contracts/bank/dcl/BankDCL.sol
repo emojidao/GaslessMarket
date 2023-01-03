@@ -19,7 +19,7 @@ contract BankDCL is Bank, IBank721, OwnableUpgradeable {
     mapping(bytes32 => Duration) public durations;
 
     constructor(address owner_, address admin_) {
-        initOwnableContract(owner_, admin_);
+        _initOwnable(owner_, admin_);
     }
 
     function tryStakeNFT721(

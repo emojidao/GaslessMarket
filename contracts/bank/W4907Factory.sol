@@ -7,7 +7,7 @@ import "../lib/OwnableUpgradeable.sol";
 import "../erc4907/IERC4907.sol";
 import "../erc4907/wrap/IWrapNFTUpgradeable.sol";
 
-contract W4907Factory is OwnableUpgradeable {
+abstract contract W4907Factory is OwnableUpgradeable {
     event DeployW4907(
         address w4907,
         string name,
@@ -17,12 +17,8 @@ contract W4907Factory is OwnableUpgradeable {
 
     address public w4907Impl;
 
-    constructor(
-        address owner_,
-        address admin_,
-        address w4907Impl_
-    ) {
-        initOwnableContract(owner_, admin_);
+    function _initW4907(address w4907Impl_) internal {
+        require(w4907Impl == address(0));
         w4907Impl = w4907Impl_;
     }
 

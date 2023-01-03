@@ -7,17 +7,13 @@ import "../lib/OwnableUpgradeable.sol";
 import "../erc5006/IERC5006.sol";
 import "../erc5006/IWrappedInERC5006.sol";
 
-contract W5006Factory is OwnableUpgradeable {
+abstract contract W5006Factory is OwnableUpgradeable {
     event DeployW5006(address w5006, address originalAddress);
 
     address public w5006Impl;
 
-    constructor(
-        address owner_,
-        address admin_,
-        address w5006Impl_
-    ) {
-        initOwnableContract(owner_, admin_);
+    function _initW5006(address w5006Impl_) internal {
+        require(w5006Impl == address(0));
         w5006Impl = w5006Impl_;
     }
 

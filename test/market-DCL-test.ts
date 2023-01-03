@@ -50,7 +50,7 @@ describe("TestMarket 721 DCL", function () {
         
 
         const Bank721 = await ethers.getContractFactory("Bank721");
-        let bank721 = await Bank721.deploy(ownerOfMarket.address, adminOfMarket.address, w4907.address);
+        let bank721 = await upgrades.deployProxy(Bank721, [ownerOfMarket.address, adminOfMarket.address, w4907.address], { unsafeAllow: ['delegatecall'] });
 
         const RentalMarket721 = await ethers.getContractFactory("RentalMarket721");
         market = await RentalMarket721.deploy();
@@ -349,7 +349,7 @@ describe("TestMarket 721 DCL", function () {
                 signature:sig.compact,
                 signatureVersion: SignatureVersion.EIP712
             }
-            // let orderHash = typedDataEncoder_lendOrder.hashStruct('LendOrder', lendOrder);
+            let orderHash = typedDataEncoder_lendOrder.hashStruct('LendOrder', lendOrder);
             await market.connect(ownerOfNFT).cancelLendOrder(lendOrder);
             if (lendOrder.price.paymentToken == ethers.constants.AddressZero) {
                 await expect(market.connect(renterA).fulfillLendOrder721(lendOrder, iSig, 10, { value: ethers.utils.parseEther('10') })).to.be.revertedWith("Be cancelled or fulfilled already");
