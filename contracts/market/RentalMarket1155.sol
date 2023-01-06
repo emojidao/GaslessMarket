@@ -27,7 +27,7 @@ contract RentalMarket1155 is BaseRentalMarket, IRentalMarket1155 {
         uint64 tokenAmount,
         uint256 cycleAmount,
         IBank1155.RentingRecord[] calldata toDeletes
-    ) external payable {
+    ) external payable whenNotPaused{
         require(cycleAmount >= lendOrder.minCycleAmount, "invalid cycleAmount");
         bytes32 orderHash = _hashStruct_LendOrder(lendOrder);
         _validateOrder(
@@ -81,7 +81,7 @@ contract RentalMarket1155 is BaseRentalMarket, IRentalMarket1155 {
         RentOffer calldata rentOffer,
         Signature calldata signature,
         IBank1155.RentingRecord[] calldata toDeletes
-    ) public {
+    ) public whenNotPaused{
         bytes32 offerHash = _hashStruct_RentOffer(rentOffer);
         _validateOrder(
             rentOffer.maker,

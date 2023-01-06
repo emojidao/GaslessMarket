@@ -26,7 +26,7 @@ contract RentalMarket721 is BaseRentalMarket, IRentalMarket721 {
         LendOrder calldata lendOrder,
         Signature calldata signature,
         uint256 cycleAmount
-    ) external payable {
+    ) external payable whenNotPaused{
         require(cycleAmount >= lendOrder.minCycleAmount, "invalid cycleAmount");
         bytes32 orderHash = _hashStruct_LendOrder(lendOrder);
         _validateOrder(
@@ -75,7 +75,7 @@ contract RentalMarket721 is BaseRentalMarket, IRentalMarket721 {
         RentOffer calldata rentOffer,
         Signature calldata signature,
         uint256 durationId
-    ) public {
+    ) public whenNotPaused{
         bytes32 offerHash = _hashStruct_RentOffer(rentOffer);
         _validateOrder(
             rentOffer.maker,
@@ -121,7 +121,7 @@ contract RentalMarket721 is BaseRentalMarket, IRentalMarket721 {
         );
     }
 
-    function redeemAndCancleLendOrder(LendOrder calldata lendOrder) public {
+    function redeemAndCancleLendOrder(LendOrder calldata lendOrder) public{
         cancelLendOrder(lendOrder);
         IBank721(bankOf(lendOrder.nft.token)).redeemNFT721(
             lendOrder.nft.tokenType,
