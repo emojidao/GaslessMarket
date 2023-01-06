@@ -60,7 +60,7 @@ describe("TestMarket 1155", function () {
         await testERC1155.mint(ownerOfNFT.address, firstTokenId, 100)
         await testERC1155.mint(ownerOfNFT.address, secondTokenId, 100)
 
-        await testERC1155.connect(ownerOfNFT).setApprovalForAll(w5006_test.address, true);
+        // await testERC1155.connect(ownerOfNFT).setApprovalForAll(w5006_test.address, true);
         await testERC1155.connect(ownerOfNFT).setApprovalForAll(bank.address, true);
 
         typedDataEncoder_lendOrder = ethers.utils._TypedDataEncoder.from(types_lendOrder);
