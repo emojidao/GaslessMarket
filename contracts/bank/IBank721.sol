@@ -40,4 +40,6 @@ interface IBank721 {
         uint256 expiry,
         uint256 durationId
     ) external;
+
+    function claimUser(NFT calldata nft, uint256 durationId) external;
 }
