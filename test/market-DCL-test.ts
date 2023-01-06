@@ -47,8 +47,6 @@ describe("TestMarket 721 DCL", function () {
         const WrappedInERC4907Upgradeable = await ethers.getContractFactory("WrappedInERC4907Upgradeable");
         let w4907 = await WrappedInERC4907Upgradeable.deploy();
 
-        
-
         const Bank721 = await ethers.getContractFactory("Bank721");
         let bank721 = await upgrades.deployProxy(Bank721, [ownerOfMarket.address, adminOfMarket.address, w4907.address], { unsafeAllow: ['delegatecall'] });
 
@@ -60,12 +58,12 @@ describe("TestMarket 721 DCL", function () {
         testERC721 = await LANDRegistry.deploy();
 
         const BankDCL = await ethers.getContractFactory("BankDCL");
-        bank_dcl = await BankDCL.deploy(ownerOfMarket.address, adminOfMarket.address);
+        bank_dcl = await upgrades.deployProxy(BankDCL, [ownerOfMarket.address, adminOfMarket.address], { unsafeAllow: ['delegatecall'] });
         await market.registerBank(testERC721.address, bank_dcl.address);
-        
+
         firstTokenId = await testERC721._unsafeEncodeTokenId(100, 100);
         secondTokenId = await testERC721._unsafeEncodeTokenId(100, 101);
-        await testERC721.updateWhiteListMap([ownerOfMarket.address],true);
+        await testERC721.updateWhiteListMap([ownerOfMarket.address], true);
         await testERC721.assignNewParcel(100, 100, ownerOfNFT.address)
         await testERC721.assignNewParcel(100, 101, ownerOfNFT.address)
 
@@ -140,7 +138,7 @@ describe("TestMarket 721 DCL", function () {
             expect(addr).equal(ownerOfNFT.address)
             sig = ethers.utils.splitSignature(flatSig);
             iSig = {
-                signature:sig.compact,
+                signature: sig.compact,
                 signatureVersion: SignatureVersion.EIP712
             }
             if (lendOrder.price.paymentToken == ethers.constants.AddressZero) {
@@ -149,13 +147,13 @@ describe("TestMarket 721 DCL", function () {
                 receipt = await market.connect(renterA).fulfillLendOrder721(lendOrder, iSig, 10);
             }
 
-            let data = await bank_dcl.userInfoOf(TokenType.ERC721,testERC721.address, firstTokenId);
+            let data = await bank_dcl.userInfoOf(TokenType.ERC721, testERC721.address, firstTokenId);
             let rentExpiry = timestamp + 86400 * 10;
-            console.log('data',data);
-            
+            console.log('data', data);
+
             let checkInData = await bank_dcl.checkInOf(testERC721.address, firstTokenId);
-            console.log('checkInData',checkInData);
-            
+            console.log('checkInData', checkInData);
+
             expect(data[0]).equal(renterA.address);
             expect(data[1]).gte(rentExpiry)
             expect(await testERC721.ownerOf(firstTokenId)).equal(bank_dcl.address);
@@ -180,7 +178,7 @@ describe("TestMarket 721 DCL", function () {
             expect(addr_sublet).equal(renterA.address)
             sig = ethers.utils.splitSignature(flatSig_sublet);
             iSig = {
-                signature:sig.compact,
+                signature: sig.compact,
                 signatureVersion: SignatureVersion.EIP712
             }
             if (subletOrder.price.paymentToken == ethers.constants.AddressZero) {
@@ -189,7 +187,7 @@ describe("TestMarket 721 DCL", function () {
                 receipt = await market.connect(renterB).fulfillLendOrder721(subletOrder, iSig, 1);
             }
 
-            let data_renterB = await bank_dcl.userInfoOf(TokenType.ERC721,testERC721.address, firstTokenId);
+            let data_renterB = await bank_dcl.userInfoOf(TokenType.ERC721, testERC721.address, firstTokenId);
             console.log('user', data_renterB[0]);
             console.log('userExpires', data_renterB[1]);
 
@@ -200,7 +198,7 @@ describe("TestMarket 721 DCL", function () {
             let flatSig_other = await other._signTypedData(domain, types_lendOrder, lendOrder);
             sig = ethers.utils.splitSignature(flatSig_other);
             let iSig_by_other = {
-                signature:sig.compact,
+                signature: sig.compact,
                 signatureVersion: SignatureVersion.EIP712
             }
             if (lendOrder.price.paymentToken == ethers.constants.AddressZero) {
@@ -214,7 +212,7 @@ describe("TestMarket 721 DCL", function () {
             let flatSig_other = await other._signTypedData(domain, types_lendOrder, lendOrder);
             sig = ethers.utils.splitSignature(flatSig_other);
             let iSig_by_other = {
-                signature:sig.compact,
+                signature: sig.compact,
                 signatureVersion: SignatureVersion.EIP712
             }
             if (lendOrder.price.paymentToken == ethers.constants.AddressZero) {
@@ -230,7 +228,7 @@ describe("TestMarket 721 DCL", function () {
             expect(addr).equal(ownerOfNFT.address)
             sig = ethers.utils.splitSignature(flatSig);
             iSig = {
-                signature:sig.compact,
+                signature: sig.compact,
                 signatureVersion: SignatureVersion.EIP712
             }
             if (lendOrder.price.paymentToken == ethers.constants.AddressZero) {
@@ -245,7 +243,7 @@ describe("TestMarket 721 DCL", function () {
             expect(addr).equal(ownerOfNFT.address)
             sig = ethers.utils.splitSignature(flatSig);
             iSig = {
-                signature:sig.compact,
+                signature: sig.compact,
                 signatureVersion: SignatureVersion.EIP712
             }
             if (lendOrder.price.paymentToken == ethers.constants.AddressZero) {
@@ -262,7 +260,7 @@ describe("TestMarket 721 DCL", function () {
             expect(addr).equal(ownerOfNFT.address)
             sig = ethers.utils.splitSignature(flatSig);
             iSig = {
-                signature:sig.compact,
+                signature: sig.compact,
                 signatureVersion: SignatureVersion.EIP712
             }
             if (lendOrder.price.paymentToken == ethers.constants.AddressZero) {
@@ -279,7 +277,7 @@ describe("TestMarket 721 DCL", function () {
             expect(addr).equal(ownerOfNFT.address)
             sig = ethers.utils.splitSignature(flatSig);
             iSig = {
-                signature:sig.compact,
+                signature: sig.compact,
                 signatureVersion: SignatureVersion.EIP712
             }
             if (lendOrder.price.paymentToken == ethers.constants.AddressZero) {
@@ -296,7 +294,7 @@ describe("TestMarket 721 DCL", function () {
             expect(addr).equal(ownerOfNFT.address)
             sig = ethers.utils.splitSignature(flatSig);
             iSig = {
-                signature:sig.compact,
+                signature: sig.compact,
                 signatureVersion: SignatureVersion.EIP712
             }
             if (lendOrder.price.paymentToken == ethers.constants.AddressZero) {
@@ -313,7 +311,7 @@ describe("TestMarket 721 DCL", function () {
             expect(addr).equal(ownerOfNFT.address)
             sig = ethers.utils.splitSignature(flatSig);
             iSig = {
-                signature:sig.compact,
+                signature: sig.compact,
                 signatureVersion: SignatureVersion.EIP712
             }
             if (lendOrder.price.paymentToken == ethers.constants.AddressZero) {
@@ -329,7 +327,7 @@ describe("TestMarket 721 DCL", function () {
             expect(addr).equal(ownerOfNFT.address)
             sig = ethers.utils.splitSignature(flatSig);
             iSig = {
-                signature:sig.compact,
+                signature: sig.compact,
                 signatureVersion: SignatureVersion.EIP712
             }
             await hre.network.provider.send("hardhat_mine", ["0x15180", "0xb4"]);//86400 * 180
@@ -346,7 +344,7 @@ describe("TestMarket 721 DCL", function () {
             expect(addr).equal(ownerOfNFT.address)
             sig = ethers.utils.splitSignature(flatSig);
             iSig = {
-                signature:sig.compact,
+                signature: sig.compact,
                 signatureVersion: SignatureVersion.EIP712
             }
             let orderHash = typedDataEncoder_lendOrder.hashStruct('LendOrder', lendOrder);
@@ -413,12 +411,12 @@ describe("TestMarket 721 DCL", function () {
             expect(addr).equal(renterA.address)
             sig = ethers.utils.splitSignature(flatSig);
             iSig = {
-                signature:sig.compact,
+                signature: sig.compact,
                 signatureVersion: SignatureVersion.EIP712
             }
             receipt = await market.connect(ownerOfNFT).fulfillRentOffer721(rentOffer_A, iSig, ethers.constants.MaxUint256);
 
-            let data_renterA = await bank_dcl.userInfoOf(TokenType.ERC721,testERC721.address, firstTokenId);
+            let data_renterA = await bank_dcl.userInfoOf(TokenType.ERC721, testERC721.address, firstTokenId);
             console.log('user', data_renterA[0]);
             console.log('userExpires', data_renterA[1]);
 
@@ -429,12 +427,12 @@ describe("TestMarket 721 DCL", function () {
             expect(addr_sublet).equal(renterB.address)
             sig = ethers.utils.splitSignature(flatSig_sublet);
             iSig = {
-                signature:sig.compact,
+                signature: sig.compact,
                 signatureVersion: SignatureVersion.EIP712
             }
             receipt = await market.connect(renterA).fulfillRentOffer721(rentOffer_B, iSig, data_renterA[1]);
 
-            let data_renterB = await bank_dcl.userInfoOf(TokenType.ERC721,testERC721.address, firstTokenId);
+            let data_renterB = await bank_dcl.userInfoOf(TokenType.ERC721, testERC721.address, firstTokenId);
             console.log('user', data_renterB[0]);
             console.log('userExpires', data_renterB[1]);
 
@@ -448,7 +446,7 @@ describe("TestMarket 721 DCL", function () {
             expect(addr).equal(renterA.address)
             sig = ethers.utils.splitSignature(flatSig);
             iSig = {
-                signature:sig.compact,
+                signature: sig.compact,
                 signatureVersion: SignatureVersion.EIP712
             }
             receipt = await market.connect(ownerOfNFT).fulfillRentOffer721(rentOffer_A, iSig, ethers.constants.MaxUint256);
@@ -458,7 +456,7 @@ describe("TestMarket 721 DCL", function () {
             expect(addr_sublet).equal(renterB.address)
             sig = ethers.utils.splitSignature(flatSig_renterB);
             iSig = {
-                signature:sig.compact,
+                signature: sig.compact,
                 signatureVersion: SignatureVersion.EIP712
             }
 
@@ -472,7 +470,7 @@ describe("TestMarket 721 DCL", function () {
             expect(addr).equal(renterA.address)
             sig = ethers.utils.splitSignature(flatSig);
             iSig = {
-                signature:sig.compact,
+                signature: sig.compact,
                 signatureVersion: SignatureVersion.EIP712
             }
             receipt = await market.connect(ownerOfNFT).fulfillRentOffer721(rentOffer_A, iSig, ethers.constants.MaxUint256);
@@ -485,7 +483,7 @@ describe("TestMarket 721 DCL", function () {
             expect(addr).equal(renterA.address)
             sig = ethers.utils.splitSignature(flatSig);
             iSig = {
-                signature:sig.compact,
+                signature: sig.compact,
                 signatureVersion: SignatureVersion.EIP712
             }
             let offerHash = typedDataEncoder_rentOffer.hashStruct('RentOffer', rentOffer_A);
@@ -498,7 +496,7 @@ describe("TestMarket 721 DCL", function () {
             let flatSig_other = await other._signTypedData(domain, types_rentOffer, rentOffer_A);
             sig = ethers.utils.splitSignature(flatSig_other);
             let iSig_by_other = {
-                signature:sig.compact,
+                signature: sig.compact,
                 signatureVersion: SignatureVersion.EIP712
             }
             await expect(market.connect(ownerOfNFT).fulfillRentOffer721(rentOffer_A, iSig_by_other, ethers.constants.MaxUint256)).to.be.reverted;
@@ -512,7 +510,7 @@ describe("TestMarket 721 DCL", function () {
             expect(addr).equal(renterB.address)
             sig = ethers.utils.splitSignature(flatSig);
             iSig = {
-                signature:sig.compact,
+                signature: sig.compact,
                 signatureVersion: SignatureVersion.EIP712
             }
             await expect(market.connect(ownerOfNFT).fulfillRentOffer721(rentOffer_B, iSig, ethers.constants.MaxUint256)).to.be.revertedWith("ERC20: transfer amount exceeds balance");
@@ -526,7 +524,7 @@ describe("TestMarket 721 DCL", function () {
             expect(addr).equal(renterB.address)
             sig = ethers.utils.splitSignature(flatSig);
             iSig = {
-                signature:sig.compact,
+                signature: sig.compact,
                 signatureVersion: SignatureVersion.EIP712
             }
             await expect(market.connect(ownerOfNFT).fulfillRentOffer721(rentOffer_B, iSig, ethers.constants.MaxUint256)).to.be.revertedWith("ERC20: insufficient allowance");
@@ -564,7 +562,7 @@ describe("TestMarket 721 DCL", function () {
             expect(addr).equal(ownerOfNFT.address)
             sig = ethers.utils.splitSignature(flatSig);
             iSig = {
-                signature:sig.compact,
+                signature: sig.compact,
                 signatureVersion: SignatureVersion.EIP712
             }
             if (lendOrder.price.paymentToken == ethers.constants.AddressZero) {
@@ -584,7 +582,7 @@ describe("TestMarket 721 DCL", function () {
         });
     });
 
-    describe('incrementNonce will dislist all LendOrders and all RentOffers', function () {
+    describe('incrementNonce will delist all LendOrders and all RentOffers', function () {
         let rentalPrice_ERC20;
         let rentOffer_A;
         beforeEach(async function () {
@@ -632,7 +630,7 @@ describe("TestMarket 721 DCL", function () {
             expect(addr).equal(ownerOfNFT.address)
             sig = ethers.utils.splitSignature(flatSig);
             iSig = {
-                signature:sig.compact,
+                signature: sig.compact,
                 signatureVersion: SignatureVersion.EIP712
             }
             await expect(market.connect(renterA).fulfillLendOrder721(lendOrder, iSig, 10)).to.be.revertedWith("nonce already expired");
@@ -645,7 +643,7 @@ describe("TestMarket 721 DCL", function () {
             expect(addr).equal(renterA.address)
             sig = ethers.utils.splitSignature(flatSig);
             iSig = {
-                signature:sig.compact,
+                signature: sig.compact,
                 signatureVersion: SignatureVersion.EIP712
             }
             await expect(market.connect(ownerOfNFT).fulfillRentOffer721(rentOffer_A, iSig, ethers.constants.MaxUint256)).to.be.revertedWith("nonce already expired");
