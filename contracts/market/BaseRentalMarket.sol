@@ -24,15 +24,11 @@ abstract contract BaseRentalMarket is
     /* Storage */
     mapping(bytes32 => bool) internal cancelledOrFulfilled;
     mapping(address => uint256) internal nonces;
-    mapping(address => address) internal bandMap;
+    mapping(address => address) internal bankMap;
     address internal _baseBank;
     uint256 internal maxDuration;
 
-    function _initialize(
-        address owner_,
-        address admin_,
-        address baseBank_
-    ) internal onlyInitializing {
+    function _initialize(address owner_, address admin_, address baseBank_) internal onlyInitializing {
         __ReentrancyGuard_init();
         _initOwnable(owner_, admin_);
         _baseBank = baseBank_;
@@ -42,20 +38,21 @@ abstract contract BaseRentalMarket is
         maxDuration = 86400 * 180;
     }
 
+    function nonceOf(address account) public view returns (uint256) {
+        return nonces[account];
+    }
+
     function bankOf(address oNFT) public view returns (address) {
-        return bandMap[oNFT] == address(0) ? _baseBank : bandMap[oNFT];
+        return bankMap[oNFT] == address(0) ? _baseBank : bankMap[oNFT];
     }
 
     function _registerBank(address oNFT, address bank) internal {
         IBank(bank).bindMarket(address(this));
-        bandMap[oNFT] = bank;
+        bankMap[oNFT] = bank;
     }
 
     function _cancelOrderOrOffer(bytes32 hash) internal {
-        require(
-            !cancelledOrFulfilled[hash],
-            "Be cancelled or fulfilled already"
-        );
+        require(!cancelledOrFulfilled[hash], "Be cancelled or fulfilled already");
         cancelledOrFulfilled[hash] = true;
         emit OrderCancelled(hash);
     }
@@ -102,18 +99,10 @@ abstract contract BaseRentalMarket is
                 Address.sendValue(payable(renter), msg.value - totalPrice);
             }
             for (uint256 i = 0; i < fees.length; i++) {
-                Address.sendValue(
-                    fees[i].recipient,
-                    (totalPrice * fees[i].rate) / 100_000
-                );
+                Address.sendValue(fees[i].recipient, (totalPrice * fees[i].rate) / 100_000);
             }
         } else {
-            SafeERC20.safeTransferFrom(
-                IERC20(price.paymentToken),
-                renter,
-                lender,
-                leftTotalPrice
-            );
+            SafeERC20.safeTransferFrom(IERC20(price.paymentToken), renter, lender, leftTotalPrice);
             for (uint256 i = 0; i < fees.length; i++) {
                 SafeERC20.safeTransferFrom(
                     IERC20(price.paymentToken),
@@ -125,31 +114,15 @@ abstract contract BaseRentalMarket is
         }
     }
 
-    function _validateOrder(
-        address maker,
-        address taker,
-        uint256 nonce,
-        bytes32 orderHash
-    ) internal view {
+    function _validateOrder(address maker, address taker, uint256 nonce, bytes32 orderHash) internal view {
         require(taker == address(0) || taker == msg.sender, "invalid taker");
         require(nonce == nonces[maker], "nonce already expired");
-        require(
-            !cancelledOrFulfilled[orderHash],
-            "Be cancelled or fulfilled already"
-        );
+        require(!cancelledOrFulfilled[orderHash], "Be cancelled or fulfilled already");
     }
 
-    function _validateMetadata(NFT calldata nft, Metadata calldata metadata)
-        internal
-        view
-    {
+    function _validateMetadata(NFT calldata nft, Metadata calldata metadata) internal view {
         if (metadata.checker != address(0)) {
-            IMetadataChecker(metadata.checker).check(
-                nft.token,
-                nft.tokenId,
-                metadata.metadataHash
-            );
+            IMetadataChecker(metadata.checker).check(nft.token, nft.tokenId, metadata.metadataHash);
         }
     }
-
 }
