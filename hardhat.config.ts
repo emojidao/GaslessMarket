@@ -128,11 +128,11 @@ const config: HardhatUserConfig = {
     },
     oasys_testnet: {
       url: process.env.OASYS_TESTNET || "",
-      accounts: [process.env.TEST_PRIVATE_KEY],
+      accounts: process.env.TEST_PRIVATE_KEY !== undefined ? [process.env.TEST_PRIVATE_KEY] : [],
     },
     oasys_SandVerse: {
       url: process.env.OASYS_SandVerse || "",
-      accounts: [process.env.TEST_PRIVATE_KEY],
+      accounts: process.env.TEST_PRIVATE_KEY !== undefined ? [process.env.TEST_PRIVATE_KEY] : [],
     },
     'truffle-dashboard': {
       url: "http://localhost:24012/rpc"
