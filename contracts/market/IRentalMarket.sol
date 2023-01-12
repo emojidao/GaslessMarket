@@ -5,6 +5,7 @@ import {NFT} from "../constant/BaseStructs.sol";
 
 interface IRentalMarket {
     event OrderCancelled(bytes32 hash);
+    event OfferCancelled(bytes32 hash);
     event NonceIncremented(address trader, uint256 newNonce);
     event LendOrderFulfilled(
         bytes32 hash,
@@ -24,5 +25,4 @@ interface IRentalMarket {
         address lender,
         address renter
     );
-
 }

@@ -51,22 +51,20 @@ abstract contract BaseRentalMarket is
         bankMap[oNFT] = bank;
     }
 
-    function _cancelOrderOrOffer(bytes32 hash) internal {
-        require(!cancelledOrFulfilled[hash], "Be cancelled or fulfilled already");
-        cancelledOrFulfilled[hash] = true;
-        emit OrderCancelled(hash);
-    }
-
     function cancelLendOrder(LendOrder calldata lendOrder) public {
-        require(msg.sender == lendOrder.maker);
+        require(msg.sender == lendOrder.maker,"only maker can cancel the order");
         bytes32 orderHash = _hashStruct_LendOrder(lendOrder);
-        _cancelOrderOrOffer(orderHash);
+        require(!cancelledOrFulfilled[orderHash], "Be cancelled or fulfilled already");
+        cancelledOrFulfilled[orderHash] = true;
+        emit OrderCancelled(orderHash);
     }
 
     function cancelRentOffer(RentOffer calldata rentOffer) public {
-        require(msg.sender == rentOffer.maker);
+        require(msg.sender == rentOffer.maker,"only maker can cancel the offer");
         bytes32 offerHash = _hashStruct_RentOffer(rentOffer);
-        _cancelOrderOrOffer(offerHash);
+        require(!cancelledOrFulfilled[offerHash], "Be cancelled or fulfilled already");
+        cancelledOrFulfilled[offerHash] = true;
+        emit OfferCancelled(offerHash);
     }
 
     /**
