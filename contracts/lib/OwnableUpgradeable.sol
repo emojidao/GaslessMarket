@@ -10,9 +10,10 @@ contract OwnableUpgradeable {
     event NewOwner(address oldOwner, address newOwner);
     event NewPendingOwner(address oldPendingOwner, address newPendingOwner);
 
-    function _initOwnable(address _owner, address _admin) internal {
-        owner = _owner;
-        admin = _admin;
+    function _initOwnable(address owner_, address admin_) internal {
+        require(owner_ != address(0), "owner_ cannot be Zero Address");
+        owner = owner_;
+        admin = admin_;
     }
 
     modifier onlyOwner() {

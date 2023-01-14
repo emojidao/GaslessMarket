@@ -6,7 +6,10 @@ import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "./BaseBank721.sol";
 import "./W4907Factory.sol";
 
-contract Bank721 is BaseBank721, W4907Factory  {
+contract Bank721 is BaseBank721, W4907Factory {
+    constructor() {
+        _disableInitializers();
+    }
     function initialize(
         address owner_,
         address admin_,
@@ -28,8 +31,10 @@ contract Bank721 is BaseBank721, W4907Factory  {
                 address wNFT = oNFT_w4907[oNFT];
                 require(wNFT != address(0), "wNFT is not deployed yet");
                 IWrapNFT(wNFT).stake(oNFTId, from, address(this));
-            } else {
+            } else if (tokenType == TokenType.ERC4907) {
                 IERC721(oNFT).transferFrom(from, address(this), oNFTId);
+            } else {
+                revert("invalid token type");
             }
         }
     }
@@ -38,35 +43,39 @@ contract Bank721 is BaseBank721, W4907Factory  {
         TokenType tokenType,
         address oNFT,
         uint256 oNFTId
-    ) public virtual override{
+    ) public virtual override {
         bytes32 key = keccak256(abi.encode(oNFT, oNFTId, type(uint256).max));
         require(durations[key].start < block.timestamp, "cannot redeem now");
         if (tokenType == TokenType.ERC721) {
             address w4907 = oNFT_w4907[oNFT];
+            require(w4907 != address(0), "w4907 is Zero Address");
             IWrapNFT(w4907).redeem(oNFTId, staked[oNFT][oNFTId]);
-        } else {
+        } else if (tokenType == TokenType.ERC4907) {
             IERC721(oNFT).transferFrom(
                 address(this),
                 staked[oNFT][oNFTId],
                 oNFTId
             );
+        } else {
+            revert("invalid token type");
         }
         delete staked[oNFT][oNFTId];
         delete durations[key];
     }
 
-
     function _setUser(
         NFT calldata nft,
         address user,
         uint256 expiry
-    ) internal virtual override{
+    ) internal virtual override {
         if (nft.tokenType == TokenType.ERC721) {
             address w4907 = oNFT_w4907[nft.token];
             require(w4907 != address(0), "wNFT is not deployed yet");
-            IERC4907(w4907).setUser(nft.tokenId, user, uint64(expiry));
+            IERC4907(w4907).setUser(nft.tokenId, user, SafeCast.toUint64(expiry));
+        } else if (nft.tokenType == TokenType.ERC4907) {
+            IERC4907(nft.token).setUser(nft.tokenId, user, SafeCast.toUint64(expiry));
         } else {
-            IERC4907(nft.token).setUser(nft.tokenId, user, uint64(expiry));
+            revert("invalid token type");
         }
     }
 
@@ -80,10 +89,13 @@ contract Bank721 is BaseBank721, W4907Factory  {
             require(w4907 != address(0), "wNFT is not deployed yet");
             user = IERC4907(w4907).userOf(oNFTId);
             userExpires = IERC4907(w4907).userExpires(oNFTId);
-        } else {
+        } else if (tokenType == TokenType.ERC4907) {
             user = IERC4907(oNFT).userOf(oNFTId);
             userExpires = IERC4907(oNFT).userExpires(oNFTId);
+        } else {
+            revert("invalid token type");
         }
     }
 
+    uint256[64] private __gap;
 }

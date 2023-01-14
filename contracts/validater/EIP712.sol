@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.13;
 
+import "@openzeppelin/contracts/utils/math/SafeCast.sol";
 import {LendOrder, RentalPrice, RentOffer} from "../constant/RentalStructs.sol";
 import {NFT, Fee, SignatureVersion, Signature, Metadata} from "../constant/BaseStructs.sol";
 import {SignatureVerificationErrors} from "./SignatureVerificationErrors.sol";
@@ -64,19 +65,15 @@ contract EIP712 is SignatureVerificationErrors {
         return keccak256(abi.encode(NFT_TYPEHASH, nft));
     }
 
-    function _hashStruct_Metadata(Metadata calldata metadata)
-        public
-        pure
-        returns (bytes32)
-    {
+    function _hashStruct_Metadata(
+        Metadata calldata metadata
+    ) public pure returns (bytes32) {
         return keccak256(abi.encode(METADATA_TYPEHASH, metadata));
     }
 
-    function _hashStruct_RentalPrice(RentalPrice calldata price)
-        public
-        pure
-        returns (bytes32)
-    {
+    function _hashStruct_RentalPrice(
+        RentalPrice calldata price
+    ) public pure returns (bytes32) {
         return keccak256(abi.encode(RENTAL_PRICE_TYPEHASH, price));
     }
 
@@ -92,11 +89,9 @@ contract EIP712 is SignatureVerificationErrors {
         return keccak256(abi.encodePacked(feeHashes));
     }
 
-    function _hashStruct_LendOrder(LendOrder calldata order)
-        public
-        pure
-        returns (bytes32)
-    {
+    function _hashStruct_LendOrder(
+        LendOrder calldata order
+    ) public pure returns (bytes32) {
         return
             keccak256(
                 abi.encode(
@@ -116,11 +111,9 @@ contract EIP712 is SignatureVerificationErrors {
             );
     }
 
-    function _hashStruct_RentOffer(RentOffer calldata rentOffer)
-        public
-        pure
-        returns (bytes32)
-    {
+    function _hashStruct_RentOffer(
+        RentOffer calldata rentOffer
+    ) public pure returns (bytes32) {
         return
             keccak256(
                 abi.encode(
@@ -186,7 +179,7 @@ contract EIP712 is SignatureVerificationErrors {
 
             s = vs & EIP2098_allButHighestBitMask;
 
-            v = uint8(uint256(vs >> 255)) + 27;
+            v = SafeCast.toUint8(uint256(vs >> 255)) + 27;
         } else if (signature.length == 65) {
             (r, s) = abi.decode(signature, (bytes32, bytes32));
             v = uint8(signature[64]);

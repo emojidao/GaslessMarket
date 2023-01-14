@@ -6,17 +6,18 @@ import "../lib/OwnableUpgradeable.sol";
 import "../bank/BaseBank721.sol";
 import "./IDCL.sol";
 
-contract BankDCL is OwnableUpgradeable,BaseBank721 {
+contract BankDCL is OwnableUpgradeable, BaseBank721 {
     struct CheckInData {
         address user;
         uint64 expiredAt;
     }
     mapping(address => mapping(uint256 => CheckInData)) public checkInMap;
 
-    function initialize(
-        address owner_,
-        address admin_
-    ) public initializer {
+    constructor() {
+        _disableInitializers();
+    }
+
+    function initialize(address owner_, address admin_) public initializer {
         _initOwnable(owner_, admin_);
     }
 
@@ -36,7 +37,7 @@ contract BankDCL is OwnableUpgradeable,BaseBank721 {
         TokenType tokenType,
         address oNFT,
         uint256 oNFTId
-    ) public virtual override{
+    ) public virtual override {
         bytes32 key = keccak256(abi.encode(oNFT, oNFTId, type(uint256).max));
         require(durations[key].start < block.timestamp, "cannot redeem now");
         IERC721(oNFT).transferFrom(address(this), staked[oNFT][oNFTId], oNFTId);
@@ -48,16 +49,18 @@ contract BankDCL is OwnableUpgradeable,BaseBank721 {
         NFT calldata nft,
         address user,
         uint256 expiry
-    ) internal virtual override{
+    ) internal virtual override {
         IDCL(nft.token).setUpdateOperator(nft.tokenId, user);
-        checkInMap[nft.token][nft.tokenId] = CheckInData(user, uint64(expiry));
+        checkInMap[nft.token][nft.tokenId] = CheckInData(
+            user,
+            SafeCast.toUint64(expiry)
+        );
     }
 
-    function isExpired(address oNFT, uint256 oNFTId)
-        public
-        view
-        returns (bool)
-    {
+    function isExpired(
+        address oNFT,
+        uint256 oNFTId
+    ) public view returns (bool) {
         return checkInMap[oNFT][oNFTId].expiredAt < block.timestamp;
     }
 
@@ -80,21 +83,18 @@ contract BankDCL is OwnableUpgradeable,BaseBank721 {
         TokenType tokenType,
         address oNFT,
         uint256 oNFTId
-    ) public virtual override view returns (address user, uint256 userExpires) {
+    ) public view virtual override returns (address user, uint256 userExpires) {
         user = IDCL(oNFT).updateOperator(oNFTId);
         if (user == checkInMap[oNFT][oNFTId].user) {
             userExpires = checkInMap[oNFT][oNFTId].expiredAt;
         }
     }
 
-
-    function checkInOf(address oNFT, uint256 oNFTId)
-        public
-        view
-        returns (address user, uint256 userExpires)
-    {
+    function checkInOf(
+        address oNFT,
+        uint256 oNFTId
+    ) public view returns (address user, uint256 userExpires) {
         user = checkInMap[oNFT][oNFTId].user;
         userExpires = checkInMap[oNFT][oNFTId].expiredAt;
     }
-    
 }

@@ -28,7 +28,11 @@ abstract contract BaseRentalMarket is
     address internal _baseBank;
     uint256 internal maxDuration;
 
-    function _initialize(address owner_, address admin_, address baseBank_) internal onlyInitializing {
+    function _initialize(
+        address owner_,
+        address admin_,
+        address baseBank_
+    ) internal onlyInitializing {
         __ReentrancyGuard_init();
         _initOwnable(owner_, admin_);
         _baseBank = baseBank_;
@@ -52,17 +56,29 @@ abstract contract BaseRentalMarket is
     }
 
     function cancelLendOrder(LendOrder calldata lendOrder) public {
-        require(msg.sender == lendOrder.maker,"only maker can cancel the order");
+        require(
+            msg.sender == lendOrder.maker,
+            "only maker can cancel the order"
+        );
         bytes32 orderHash = _hashStruct_LendOrder(lendOrder);
-        require(!cancelledOrFulfilled[orderHash], "Be cancelled or fulfilled already");
+        require(
+            !cancelledOrFulfilled[orderHash],
+            "Be cancelled or fulfilled already"
+        );
         cancelledOrFulfilled[orderHash] = true;
         emit OrderCancelled(orderHash);
     }
 
     function cancelRentOffer(RentOffer calldata rentOffer) public {
-        require(msg.sender == rentOffer.maker,"only maker can cancel the offer");
+        require(
+            msg.sender == rentOffer.maker,
+            "only maker can cancel the offer"
+        );
         bytes32 offerHash = _hashStruct_RentOffer(rentOffer);
-        require(!cancelledOrFulfilled[offerHash], "Be cancelled or fulfilled already");
+        require(
+            !cancelledOrFulfilled[offerHash],
+            "Be cancelled or fulfilled already"
+        );
         cancelledOrFulfilled[offerHash] = true;
         emit OfferCancelled(offerHash);
     }
@@ -97,10 +113,18 @@ abstract contract BaseRentalMarket is
                 Address.sendValue(payable(renter), msg.value - totalPrice);
             }
             for (uint256 i = 0; i < fees.length; i++) {
-                Address.sendValue(fees[i].recipient, (totalPrice * fees[i].rate) / 100_000);
+                Address.sendValue(
+                    fees[i].recipient,
+                    (totalPrice * fees[i].rate) / 100_000
+                );
             }
         } else {
-            SafeERC20.safeTransferFrom(IERC20(price.paymentToken), renter, lender, leftTotalPrice);
+            SafeERC20.safeTransferFrom(
+                IERC20(price.paymentToken),
+                renter,
+                lender,
+                leftTotalPrice
+            );
             for (uint256 i = 0; i < fees.length; i++) {
                 SafeERC20.safeTransferFrom(
                     IERC20(price.paymentToken),
@@ -112,15 +136,31 @@ abstract contract BaseRentalMarket is
         }
     }
 
-    function _validateOrder(address maker, address taker, uint256 nonce, bytes32 orderHash) internal view {
+    function _validateOrder(
+        address maker,
+        address taker,
+        uint256 nonce,
+        bytes32 orderHash
+    ) internal view {
         require(taker == address(0) || taker == msg.sender, "invalid taker");
         require(nonce == nonces[maker], "nonce already expired");
-        require(!cancelledOrFulfilled[orderHash], "Be cancelled or fulfilled already");
+        require(
+            !cancelledOrFulfilled[orderHash],
+            "Be cancelled or fulfilled already"
+        );
     }
 
-    function _validateMetadata(NFT calldata nft, Metadata calldata metadata) internal view {
+    function _validateMetadata(
+        NFT calldata nft,
+        Metadata calldata metadata
+    ) internal view {
         if (metadata.checker != address(0)) {
-            IMetadataChecker(metadata.checker).check(nft.token, nft.tokenId, metadata.metadataHash);
+            bool isValid = IMetadataChecker(metadata.checker).check(
+                nft.token,
+                nft.tokenId,
+                metadata.metadataHash
+            );
+            require(isValid, "metadata is invalid");
         }
     }
 }

@@ -14,15 +14,26 @@ abstract contract W5006Factory is OwnableUpgradeable {
     mapping(address => address) public oNFT_w5006;
 
     function _initW5006(address w5006Impl_) internal {
-        require(w5006Impl == address(0));
+        require(
+            IERC165(w5006Impl_).supportsInterface(type(IERC5006).interfaceId),
+            "not ERC5006"
+        );
         w5006Impl = w5006Impl_;
     }
 
     function setW5006Impl(address w5006Impl_) public onlyAdmin {
-        w5006Impl = w5006Impl_;
+        _initW5006(w5006Impl_);
     }
 
     function _deployW5006(address oNFT) internal returns (address w5006) {
+        require(
+            IERC165(oNFT).supportsInterface(type(IERC1155).interfaceId),
+            "oNFT is not ERC1155"
+        );
+        require(
+            !IERC165(oNFT).supportsInterface(type(IERC5006).interfaceId),
+            "oNFT is ERC5006 already"
+        );
         w5006 = Clones.clone(w5006Impl);
         IWrappedIn(w5006).initializeWrap(oNFT);
         emit DeployW5006(w5006, oNFT);

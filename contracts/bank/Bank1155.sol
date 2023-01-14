@@ -13,6 +13,10 @@ contract Bank1155 is Bank, W5006Factory, ERC1155Receiver, IBank1155 {
     //                  amount
     mapping(bytes32 => uint256) internal rentingMap;
 
+    constructor() {
+        _disableInitializers();
+    }
+
     function initialize(
         address owner_,
         address admin_,
@@ -61,7 +65,7 @@ contract Bank1155 is Bank, W5006Factory, ERC1155Receiver, IBank1155 {
         return frozenAmountMap[fkey];
     }
 
-    function createUserRecord(RecordParam memory param) external {
+    function createUserRecord(RecordParam memory param) external onlyMarket {
         IERC1155(param.oNFT).safeTransferFrom(
             param.owner,
             address(this),
@@ -77,15 +81,15 @@ contract Bank1155 is Bank, W5006Factory, ERC1155Receiver, IBank1155 {
                 address(this),
                 param.user,
                 param.oNFTId,
-                uint64(param.oNFTAmount),
-                uint64(param.expiry)
+                SafeCast.toUint64(param.oNFTAmount),
+                SafeCast.toUint64(param.expiry)
             );
         } else if (param.tokenType == TokenType.ERC1155) {
             recordId = IWrappedInERC5006(addr5006).stakeAndCreateUserRecord(
                 param.oNFTId,
-                uint64(param.oNFTAmount),
+                SafeCast.toUint64(param.oNFTAmount),
                 param.user,
-                uint64(param.expiry)
+                SafeCast.toUint64(param.expiry)
             );
         }
 
@@ -108,6 +112,7 @@ contract Bank1155 is Bank, W5006Factory, ERC1155Receiver, IBank1155 {
             param.recordId
         );
         if (record.amount == 0) return;
+        if (record.expiry > block.timestamp) return;
         bytes32 rentingKey = _rentingKey(
             param.oNFT,
             param.oNFTId,

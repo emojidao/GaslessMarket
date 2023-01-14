@@ -96,7 +96,7 @@ abstract contract BaseBank721 is Bank, IBank721 {
             );
         }
         require(start > durations[key].start);
-        durations[key].start = uint40(start);
+        durations[key].start = SafeCast.toUint40(start);
     }
 
     function supportsInterface(

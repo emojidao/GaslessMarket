@@ -48,17 +48,17 @@ describe("TestMarket 721 DCL", function () {
         let w4907 = await WrappedInERC4907Upgradeable.deploy();
 
         const Bank721 = await ethers.getContractFactory("Bank721");
-        let bank721 = await upgrades.deployProxy(Bank721, [ownerOfMarket.address, adminOfMarket.address, w4907.address], { unsafeAllow: ['delegatecall'] });
+        let bank721 = await upgrades.deployProxy(Bank721, [ownerOfMarket.address, adminOfMarket.address, w4907.address], { unsafeAllow: ['delegatecall','constructor'] });
 
         const RentalMarket721 = await ethers.getContractFactory("RentalMarket721");
         market = await RentalMarket721.deploy();
-        market = await upgrades.deployProxy(RentalMarket721, [ownerOfMarket.address, adminOfMarket.address, bank721.address], { unsafeAllow: ['delegatecall'] });
+        market = await upgrades.deployProxy(RentalMarket721, [ownerOfMarket.address, adminOfMarket.address, bank721.address], { unsafeAllow: ['delegatecall','constructor'] });
 
         const LANDRegistry = await ethers.getContractFactory("contracts/test/dcl/LANDRegistry.sol:LANDRegistry");
         testERC721 = await LANDRegistry.deploy();
 
         const BankDCL = await ethers.getContractFactory("BankDCL");
-        bank_dcl = await upgrades.deployProxy(BankDCL, [ownerOfMarket.address, adminOfMarket.address], { unsafeAllow: ['delegatecall'] });
+        bank_dcl = await upgrades.deployProxy(BankDCL, [ownerOfMarket.address, adminOfMarket.address], { unsafeAllow: ['delegatecall','constructor'] });
         await market.registerBank(testERC721.address, bank_dcl.address);
 
         firstTokenId = await testERC721._unsafeEncodeTokenId(100, 100);

@@ -17,11 +17,11 @@ describe("Bank1155", function () {
         let w5006Impl = await WrappedInERC5006.deploy();
 
         const Bank1155 = await ethers.getContractFactory("Bank1155");
-        bank = await upgrades.deployProxy(Bank1155, [ownerOfMarket.address, adminOfMarket.address, w5006Impl.address], { unsafeAllow: ['delegatecall'] });
+        bank = await upgrades.deployProxy(Bank1155, [ownerOfMarket.address, adminOfMarket.address, w5006Impl.address], { unsafeAllow: ['delegatecall','constructor'] });
 
         const RentalMarket1155 = await ethers.getContractFactory("RentalMarket1155");
         market = await RentalMarket1155.deploy();
-        market = await upgrades.deployProxy(RentalMarket1155, [ownerOfMarket.address, adminOfMarket.address, bank.address], { unsafeAllow: ['delegatecall'] });
+        market = await upgrades.deployProxy(RentalMarket1155, [ownerOfMarket.address, adminOfMarket.address, bank.address], { unsafeAllow: ['delegatecall','constructor'] });
 
     })
 

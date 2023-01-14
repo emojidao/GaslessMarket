@@ -20,12 +20,15 @@ abstract contract W4907Factory is OwnableUpgradeable {
     mapping(address => address) public oNFT_w4907;
 
     function _initW4907(address w4907Impl_) internal {
-        require(w4907Impl == address(0));
+        require(
+            IERC165(w4907Impl_).supportsInterface(type(IERC4907).interfaceId),
+            "not ERC4907"
+        );
         w4907Impl = w4907Impl_;
     }
 
     function setW4907Impl(address w4907Impl_) public onlyAdmin {
-        w4907Impl = w4907Impl_;
+        _initW4907(w4907Impl_);
     }
 
     function _deployW4907(
@@ -65,10 +68,7 @@ abstract contract W4907Factory is OwnableUpgradeable {
         oNFT_w4907[oNFT] = w4907;
     }
 
-    function registerW4907(
-        address oNFT,
-        address w4907
-    ) public onlyAdmin {
+    function registerW4907(address oNFT, address w4907) public onlyAdmin {
         require(oNFT_w4907[oNFT] == address(0), "w4907 is already exists");
         require(
             IERC165(w4907).supportsInterface(type(IWrapNFT).interfaceId),
