@@ -27,6 +27,7 @@ abstract contract BaseRentalMarket is
     mapping(address => address) internal bankMap;
     address internal _baseBank;
     uint256 internal maxDuration;
+    uint256[64] private __gap;
 
     function _initialize(
         address owner_,

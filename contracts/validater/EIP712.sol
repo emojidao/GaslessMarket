@@ -224,5 +224,4 @@ contract EIP712 is SignatureVerificationErrors {
         }
     }
 
-    uint256[44] private __gap;
 }

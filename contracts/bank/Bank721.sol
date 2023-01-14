@@ -97,5 +97,4 @@ contract Bank721 is BaseBank721, W4907Factory {
         }
     }
 
-    uint256[64] private __gap;
 }

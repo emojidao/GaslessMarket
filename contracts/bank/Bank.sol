@@ -7,6 +7,7 @@ import "./IBank.sol";
 
 abstract contract Bank is Initializable, IBank {
     address public market;
+    uint256[64] private __gap;
 
     modifier onlyMarket() {
         require(msg.sender == market, "only market");
