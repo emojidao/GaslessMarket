@@ -61,7 +61,7 @@ abstract contract W4907Factory is OwnableUpgradeable {
 
     function deployW4907(address oNFT) public {
         require(oNFT_w4907[oNFT] == address(0), "w4907 is already exists");
-        (string memory name, string memory symbol) = _getNameAndSymbol(oNFT);
+        (string memory name, string memory symbol) = _genNameAndSymbol(oNFT);
         address w4907 = _deployW4907(name, symbol, oNFT);
         oNFT_w4907[oNFT] = w4907;
     }
@@ -80,16 +80,16 @@ abstract contract W4907Factory is OwnableUpgradeable {
         oNFT_w4907[oNFT] = w4907;
     }
 
-    function _getNameAndSymbol(
+    function _genNameAndSymbol(
         address oNFT
     ) internal view returns (string memory name, string memory symbol) {
         IERC721Metadata nft = IERC721Metadata(oNFT);
         try nft.name() returns (string memory _name) {
-            name = _name;
+            name = string(abi.encode("Wrap-", _name));
         } catch {}
 
         try nft.symbol() returns (string memory _symbol) {
-            symbol = _symbol;
+            symbol = string(abi.encode("W-", _symbol));
         } catch {}
     }
 
