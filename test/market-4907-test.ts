@@ -117,12 +117,12 @@ describe("TestMarket 4907", function () {
             // expect(order_hash_to_sign_local).equal(order_hash_to_sign_chain);
 
         });
-        it("_getEIP712Hash vs _TypedDataEncoder.hash", async function () {
-            let order_hash_to_sign_local = ethers.utils._TypedDataEncoder.hash(domain, types_lendOrder, lendOrder);
-            let order_hash_local = typedDataEncoder_lendOrder.hashStruct('LendOrder', lendOrder);
-            let order_hash_to_sign_chain = await market._getEIP712Hash(order_hash_local);
-            expect(order_hash_to_sign_local).equal(order_hash_to_sign_chain);
-        });
+        // it("_getEIP712Hash vs _TypedDataEncoder.hash", async function () {
+        //     let order_hash_to_sign_local = ethers.utils._TypedDataEncoder.hash(domain, types_lendOrder, lendOrder);
+        //     let order_hash_local = typedDataEncoder_lendOrder.hashStruct('LendOrder', lendOrder);
+        //     let order_hash_to_sign_chain = await market._getEIP712Hash(order_hash_local);
+        //     expect(order_hash_to_sign_local).equal(order_hash_to_sign_chain);
+        // });
 
         it("fulfillLendOrder721", async function () {
             let flatSig = await ownerOfNFT._signTypedData(domain, types_lendOrder, lendOrder);

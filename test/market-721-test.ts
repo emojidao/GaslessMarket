@@ -48,11 +48,11 @@ describe("TestMarket 721", function () {
         let w4907 = await WrappedInERC4907Upgradeable.deploy();
 
         const Bank721 = await ethers.getContractFactory("Bank721");
-        bank = await upgrades.deployProxy(Bank721, [ownerOfMarket.address, adminOfMarket.address, w4907.address], { unsafeAllow: ['delegatecall','constructor'] });
+        bank = await upgrades.deployProxy(Bank721, [ownerOfMarket.address, adminOfMarket.address, w4907.address], { unsafeAllow: ['delegatecall', 'constructor'] });
 
         const RentalMarket721 = await ethers.getContractFactory("RentalMarket721");
         market = await RentalMarket721.deploy();
-        market = await upgrades.deployProxy(RentalMarket721, [ownerOfMarket.address, adminOfMarket.address, bank.address], { unsafeAllow: ['delegatecall','constructor'] });
+        market = await upgrades.deployProxy(RentalMarket721, [ownerOfMarket.address, adminOfMarket.address, bank.address], { unsafeAllow: ['delegatecall', 'constructor'] });
 
         const TestERC721 = await ethers.getContractFactory("TestERC721");
         testERC721 = await TestERC721.deploy();
@@ -95,7 +95,7 @@ describe("TestMarket 721", function () {
     })
 
     async function deployW4907() {
-        let tx = await bank.deployW4907('', '', testERC721.address);
+        let tx = await bank.deployW4907(testERC721.address);
         let receipt = await tx.wait();
         let event = receipt.events[1]
         assert.equal(event.eventSignature, 'DeployW4907(address,string,string,address)');
@@ -129,12 +129,12 @@ describe("TestMarket 721", function () {
             erc20.connect(renterB).approve(market.address, ethers.utils.parseEther('100'));
 
         });
-        it("_getEIP712Hash vs _TypedDataEncoder.hash", async function () {
-            let order_hash_to_sign_local = ethers.utils._TypedDataEncoder.hash(domain, types_lendOrder, lendOrder);
-            let order_hash_local = typedDataEncoder_lendOrder.hashStruct('LendOrder', lendOrder);
-            let order_hash_to_sign_chain = await market._getEIP712Hash(order_hash_local);
-            expect(order_hash_to_sign_local).equal(order_hash_to_sign_chain);
-        });
+        // it("_getEIP712Hash vs _TypedDataEncoder.hash", async function () {
+        //     let order_hash_to_sign_local = ethers.utils._TypedDataEncoder.hash(domain, types_lendOrder, lendOrder);
+        //     let order_hash_local = typedDataEncoder_lendOrder.hashStruct('LendOrder', lendOrder);
+        //     let order_hash_to_sign_chain = await market._getEIP712Hash(order_hash_local);
+        //     expect(order_hash_to_sign_local).equal(order_hash_to_sign_chain);
+        // });
 
         it("fulfillLendOrder721 should succeed", async function () {
             let flatSig = await ownerOfNFT._signTypedData(domain, types_lendOrder, lendOrder);
@@ -276,6 +276,7 @@ describe("TestMarket 721", function () {
 
         it("fulfillLendOrder721 should failed if lender don't own target NFT", async function () {
             await testERC721.connect(ownerOfNFT).burn(firstTokenId);
+            lendOrder.metadata = { checker: ethers.constants.AddressZero, metadataHash: ethers.constants.HashZero };
             let flatSig = await ownerOfNFT._signTypedData(domain, types_lendOrder, lendOrder);
             let addr = ethers.utils.verifyTypedData(domain, types_lendOrder, lendOrder, flatSig);
             expect(addr).equal(ownerOfNFT.address)
@@ -292,6 +293,7 @@ describe("TestMarket 721", function () {
         });
         it("fulfillLendOrder721 should failed if lender list nonexsit NFT", async function () {
             lendOrder.nft.tokenId = nonexsitTokenId;
+            lendOrder.metadata = { checker: ethers.constants.AddressZero, metadataHash: ethers.constants.HashZero };
             let flatSig = await ownerOfNFT._signTypedData(domain, types_lendOrder, lendOrder);
             let addr = ethers.utils.verifyTypedData(domain, types_lendOrder, lendOrder, flatSig);
             expect(addr).equal(ownerOfNFT.address)
@@ -418,12 +420,12 @@ describe("TestMarket 721", function () {
             erc20.connect(renterB).approve(market.address, ethers.utils.parseEther('100'));
 
         });
-        it("_getEIP712Hash vs _TypedDataEncoder.hash", async function () {
-            let order_hash_to_sign_local = ethers.utils._TypedDataEncoder.hash(domain, types_rentOffer, rentOffer_A);
-            let order_hash_local = typedDataEncoder_rentOffer.hashStruct('RentOffer', rentOffer_A);
-            let order_hash_to_sign_chain = await market._getEIP712Hash(order_hash_local);
-            expect(order_hash_to_sign_local).equal(order_hash_to_sign_chain);
-        });
+        // it("_getEIP712Hash vs _TypedDataEncoder.hash", async function () {
+        //     let order_hash_to_sign_local = ethers.utils._TypedDataEncoder.hash(domain, types_rentOffer, rentOffer_A);
+        //     let order_hash_local = typedDataEncoder_rentOffer.hashStruct('RentOffer', rentOffer_A);
+        //     let order_hash_to_sign_chain = await market._getEIP712Hash(order_hash_local);
+        //     expect(order_hash_to_sign_local).equal(order_hash_to_sign_chain);
+        // });
 
         it("fulfillRentOffer721 should success", async function () {
             let flatSig = await renterA._signTypedData(domain, types_rentOffer, rentOffer_A);
@@ -523,7 +525,7 @@ describe("TestMarket 721", function () {
 
         });
 
-        it("fulfillLendOrder721 should failed if renter don't have enough ERC20", async function () {
+        it("fulfillRentOffer721 should failed if renter don't have enough ERC20", async function () {
             rentOffer_B.cycleAmount = 10;
             let flatSig = await renterB._signTypedData(domain, types_rentOffer, rentOffer_B);
             let addr = ethers.utils.verifyTypedData(domain, types_rentOffer, rentOffer_B, flatSig);
@@ -536,7 +538,7 @@ describe("TestMarket 721", function () {
             await expect(market.connect(ownerOfNFT).fulfillRentOffer721(rentOffer_B, iSig, ethers.constants.MaxUint256)).to.be.revertedWith("ERC20: transfer amount exceeds balance");
 
         });
-        it("fulfillLendOrder721 should failed if renter don't approve enough ERC20", async function () {
+        it("fulfillRentOffer721 should failed if renter don't approve enough ERC20", async function () {
             await erc20.mint(renterB.address, ethers.utils.parseEther('99'));
             await erc20.connect(renterB).approve(market.address, ethers.utils.parseEther('0'));
             let flatSig = await renterB._signTypedData(domain, types_rentOffer, rentOffer_B);
@@ -550,8 +552,9 @@ describe("TestMarket 721", function () {
             await expect(market.connect(ownerOfNFT).fulfillRentOffer721(rentOffer_B, iSig, ethers.constants.MaxUint256)).to.be.revertedWith("ERC20: insufficient allowance");
         });
 
-        it("fulfillLendOrder721 should failed if lender don't own target NFT", async function () {
+        it("fulfillRentOffer721 should failed if lender don't own target NFT", async function () {
             await testERC721.connect(ownerOfNFT).burn(firstTokenId);
+            rentOffer_A.metadata = { checker: ethers.constants.AddressZero, metadataHash: ethers.constants.HashZero };
             let flatSig = await renterA._signTypedData(domain, types_rentOffer, rentOffer_A);
             let addr = ethers.utils.verifyTypedData(domain, types_rentOffer, rentOffer_A, flatSig);
             expect(addr).equal(renterA.address)

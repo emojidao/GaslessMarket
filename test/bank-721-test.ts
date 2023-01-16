@@ -34,7 +34,7 @@ describe("Bank721", function () {
         it("deploy w4907 should success if w4907 is not deployed nor registered", async function () {
             let w4907 = await bank.w4907Of(testERC721.address);
             if (w4907 == ethers.constants.AddressZero) {
-                await bank.deployW4907('', '', testERC721.address);
+                await bank.deployW4907(testERC721.address);
             }
         });
         

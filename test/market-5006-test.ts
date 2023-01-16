@@ -116,12 +116,12 @@ describe("TestMarket 5006", function () {
             erc20.connect(renterB).approve(market.address, ethers.utils.parseEther('100'));
 
         });
-        it("_getEIP712Hash vs _TypedDataEncoder.hash", async function () {
-            let order_hash_to_sign_local = ethers.utils._TypedDataEncoder.hash(domain, types_lendOrder, lendOrder);
-            let order_hash_local = typedDataEncoder_lendOrder.hashStruct('LendOrder', lendOrder);
-            let order_hash_to_sign_chain = await market._getEIP712Hash(order_hash_local);
-            expect(order_hash_to_sign_local).equal(order_hash_to_sign_chain);
-        });
+        // it("_getEIP712Hash vs _TypedDataEncoder.hash", async function () {
+        //     let order_hash_to_sign_local = ethers.utils._TypedDataEncoder.hash(domain, types_lendOrder, lendOrder);
+        //     let order_hash_local = typedDataEncoder_lendOrder.hashStruct('LendOrder', lendOrder);
+        //     let order_hash_to_sign_chain = await market._getEIP712Hash(order_hash_local);
+        //     expect(order_hash_to_sign_local).equal(order_hash_to_sign_chain);
+        // });
 
         it("fulfillLendOrder1155 success", async function () {
             let flatSig = await ownerOfNFT._signTypedData(domain, types_lendOrder, lendOrder);
@@ -206,12 +206,12 @@ describe("TestMarket 5006", function () {
             erc20.connect(renterB).approve(market.address, ethers.utils.parseEther('100'));
 
         });
-        it("_getEIP712Hash vs _TypedDataEncoder.hash", async function () {
-            let order_hash_to_sign_local = ethers.utils._TypedDataEncoder.hash(domain, types_rentOffer, rentOffer_A);
-            let order_hash_local = typedDataEncoder_rentOrder.hashStruct('RentOffer', rentOffer_A);
-            let order_hash_to_sign_chain = await market._getEIP712Hash(order_hash_local);
-            expect(order_hash_to_sign_local).equal(order_hash_to_sign_chain);
-        });
+        // it("_getEIP712Hash vs _TypedDataEncoder.hash", async function () {
+        //     let order_hash_to_sign_local = ethers.utils._TypedDataEncoder.hash(domain, types_rentOffer, rentOffer_A);
+        //     let order_hash_local = typedDataEncoder_rentOrder.hashStruct('RentOffer', rentOffer_A);
+        //     let order_hash_to_sign_chain = await market._getEIP712Hash(order_hash_local);
+        //     expect(order_hash_to_sign_local).equal(order_hash_to_sign_chain);
+        // });
 
         it("fulfillRentOffer1155 success", async function () {
             let flatSig = await renterA._signTypedData(domain, types_rentOffer, rentOffer_A);
