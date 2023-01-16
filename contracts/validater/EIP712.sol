@@ -13,29 +13,29 @@ import {EIP1271Interface} from "./EIP1271Interface.sol";
  */
 contract EIP712 is SignatureVerificationErrors {
     // Signature-related
-    bytes32 constant EIP2098_allButHighestBitMask = (
+    bytes32 private constant EIP2098_allButHighestBitMask = (
         0x7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
     );
-    bytes32 public constant NFT_TYPEHASH =
+    bytes32 private constant NFT_TYPEHASH =
         keccak256(
             "NFT(uint8 tokenType,address token,uint256 tokenId,uint256 amount)"
         );
-    bytes32 public constant RENTAL_PRICE_TYPEHASH =
+    bytes32 private constant RENTAL_PRICE_TYPEHASH =
         keccak256(
             "RentalPrice(address paymentToken,uint256 pricePerCycle,uint256 cycle)"
         );
 
-    bytes32 public constant FEE_TYPEHASH =
+    bytes32 private constant FEE_TYPEHASH =
         keccak256("Fee(uint16 rate,address recipient)");
 
-    bytes32 public constant METADATA_TYPEHASH =
+    bytes32 private constant METADATA_TYPEHASH =
         keccak256("Metadata(bytes32 metadataHash,address checker)");
 
-    bytes32 public constant LEND_ORDER_TYPEHASH =
+    bytes32 private constant LEND_ORDER_TYPEHASH =
         keccak256(
             "LendOrder(address maker,address taker,NFT nft,RentalPrice price,uint256 minCycleAmount,uint256 maxRentExpiry,uint256 nonce,uint256 salt,uint256 durationId,Fee[] fees,Metadata metadata)Fee(uint16 rate,address recipient)Metadata(bytes32 metadataHash,address checker)NFT(uint8 tokenType,address token,uint256 tokenId,uint256 amount)RentalPrice(address paymentToken,uint256 pricePerCycle,uint256 cycle)"
         );
-    bytes32 public constant RENT_OFFER_TYPEHASH =
+    bytes32 private constant RENT_OFFER_TYPEHASH =
         keccak256(
             "RentOffer(address maker,address taker,NFT nft,RentalPrice price,uint256 cycleAmount,uint256 offerExpiry,uint256 nonce,uint256 salt,Fee[] fees,Metadata metadata)Fee(uint16 rate,address recipient)Metadata(bytes32 metadataHash,address checker)NFT(uint8 tokenType,address token,uint256 tokenId,uint256 amount)RentalPrice(address paymentToken,uint256 pricePerCycle,uint256 cycle)"
         );
@@ -54,26 +54,26 @@ contract EIP712 is SignatureVerificationErrors {
         );
     }
 
-    function _getEIP712Hash(bytes32 structHash) public view returns (bytes32) {
+    function _getEIP712Hash(bytes32 structHash) private view returns (bytes32) {
         return
             keccak256(
                 abi.encodePacked(hex"1901", DOMAIN_SEPARATOR, structHash)
             );
     }
 
-    function _hashStruct_NFT(NFT calldata nft) public pure returns (bytes32) {
+    function _hashStruct_NFT(NFT calldata nft) private pure returns (bytes32) {
         return keccak256(abi.encode(NFT_TYPEHASH, nft));
     }
 
     function _hashStruct_Metadata(
         Metadata calldata metadata
-    ) public pure returns (bytes32) {
+    ) private pure returns (bytes32) {
         return keccak256(abi.encode(METADATA_TYPEHASH, metadata));
     }
 
     function _hashStruct_RentalPrice(
         RentalPrice calldata price
-    ) public pure returns (bytes32) {
+    ) private pure returns (bytes32) {
         return keccak256(abi.encode(RENTAL_PRICE_TYPEHASH, price));
     }
 
@@ -91,7 +91,7 @@ contract EIP712 is SignatureVerificationErrors {
 
     function _hashStruct_LendOrder(
         LendOrder calldata order
-    ) public pure returns (bytes32) {
+    ) private pure returns (bytes32) {
         return
             keccak256(
                 abi.encode(
@@ -113,7 +113,7 @@ contract EIP712 is SignatureVerificationErrors {
 
     function _hashStruct_RentOffer(
         RentOffer calldata rentOffer
-    ) public pure returns (bytes32) {
+    ) private pure returns (bytes32) {
         return
             keccak256(
                 abi.encode(
