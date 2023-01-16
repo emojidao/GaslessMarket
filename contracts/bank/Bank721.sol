@@ -70,6 +70,7 @@ contract Bank721 is BaseBank721, W4907Factory {
         address user,
         uint256 expiry
     ) internal virtual override {
+        if (expiry > type(uint64).max) expiry = type(uint64).max;
         if (nft.tokenType == TokenType.ERC721) {
             address w4907 = oNFT_w4907[nft.token];
             require(w4907 != address(0), "wNFT is not deployed yet");
