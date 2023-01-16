@@ -10,6 +10,7 @@ contract Bank721 is BaseBank721, W4907Factory {
     constructor() {
         _disableInitializers();
     }
+
     function initialize(
         address owner_,
         address admin_,
@@ -61,6 +62,7 @@ contract Bank721 is BaseBank721, W4907Factory {
         }
         delete staked[oNFT][oNFTId];
         delete durations[key];
+        emit RedeemNFT721(oNFT, oNFTId);
     }
 
     function _setUser(
@@ -71,9 +73,17 @@ contract Bank721 is BaseBank721, W4907Factory {
         if (nft.tokenType == TokenType.ERC721) {
             address w4907 = oNFT_w4907[nft.token];
             require(w4907 != address(0), "wNFT is not deployed yet");
-            IERC4907(w4907).setUser(nft.tokenId, user, SafeCast.toUint64(expiry));
+            IERC4907(w4907).setUser(
+                nft.tokenId,
+                user,
+                SafeCast.toUint64(expiry)
+            );
         } else if (nft.tokenType == TokenType.ERC4907) {
-            IERC4907(nft.token).setUser(nft.tokenId, user, SafeCast.toUint64(expiry));
+            IERC4907(nft.token).setUser(
+                nft.tokenId,
+                user,
+                SafeCast.toUint64(expiry)
+            );
         } else {
             revert("invalid token type");
         }
@@ -96,5 +106,4 @@ contract Bank721 is BaseBank721, W4907Factory {
             revert("invalid token type");
         }
     }
-
 }
