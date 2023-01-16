@@ -3,6 +3,7 @@ pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/proxy/Clones.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
+import "@openzeppelin/contracts/token/ERC721/extensions/IERC721Metadata.sol";
 import "../lib/OwnableUpgradeable.sol";
 import "../erc4907/IERC4907.sol";
 import "../erc4907/wrap/IWrapNFT.sol";
@@ -58,12 +59,9 @@ abstract contract W4907Factory is OwnableUpgradeable {
         emit DeployW4907(address(w4907), name, symbol, originalAddress);
     }
 
-    function deployW4907(
-        string memory name,
-        string memory symbol,
-        address oNFT
-    ) public {
+    function deployW4907(address oNFT) public {
         require(oNFT_w4907[oNFT] == address(0), "w4907 is already exists");
+        (string memory name, string memory symbol) = _getNameAndSymbol(oNFT);
         address w4907 = _deployW4907(name, symbol, oNFT);
         oNFT_w4907[oNFT] = w4907;
     }
@@ -80,6 +78,19 @@ abstract contract W4907Factory is OwnableUpgradeable {
         );
         require(IWrapNFT(w4907).originalAddress() == oNFT, "invalid oNFT");
         oNFT_w4907[oNFT] = w4907;
+    }
+
+    function _getNameAndSymbol(
+        address oNFT
+    ) internal view returns (string memory name, string memory symbol) {
+        IERC721Metadata nft = IERC721Metadata(oNFT);
+        try nft.name() returns (string memory _name) {
+            name = _name;
+        } catch {}
+
+        try nft.symbol() returns (string memory _symbol) {
+            symbol = _symbol;
+        } catch {}
     }
 
     function w4907Of(address oNFT) public view returns (address) {
