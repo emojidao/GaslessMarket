@@ -2,10 +2,12 @@
 pragma solidity ^0.8.13;
 
 enum TokenType {
-    NATIVE,
-    ERC20,
     ERC721,
-    ERC4907,
+    ERC721_subNFT, //Reserved Field
+    ERC721_vNFT, //Reserved Field
     ERC1155,
-    ERC5006
+    ERC4907,
+    ERC5006,
+    ERC20,
+    NATIVE
 }
