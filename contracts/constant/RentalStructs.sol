@@ -18,7 +18,7 @@ struct LendOrder {
     uint256 maxRentExpiry;
     uint256 nonce;
     uint256 salt;
-    uint256 durationId;
+    uint64 durationId;
     Fee[] fees;
     Metadata metadata;
 }
@@ -34,13 +34,4 @@ struct RentOffer {
     uint256 salt;
     Fee[] fees;
     Metadata metadata;
-}
-
-struct MatchedOrder {
-    bytes orderHash;
-    address taker;
-    uint256 amount;
-    uint40 cycleAmount;
-    uint40 txTime;
-    uint64 salt;
 }

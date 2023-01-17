@@ -51,7 +51,7 @@ contract RentalMarket721 is BaseRentalMarket, IRentalMarket721 {
             lendOrder.nft,
             lendOrder.maker,
             msg.sender,
-            rentExpiry,
+            SafeCast.toUint64(rentExpiry),
             lendOrder.durationId
         );
 
@@ -78,7 +78,7 @@ contract RentalMarket721 is BaseRentalMarket, IRentalMarket721 {
     function fulfillRentOffer721(
         RentOffer calldata rentOffer,
         Signature calldata signature,
-        uint256 durationId
+        uint64 durationId
     ) public whenNotPaused {
         bytes32 offerHash = _hashStruct_RentOffer(rentOffer);
         _validateOrder(
@@ -101,7 +101,7 @@ contract RentalMarket721 is BaseRentalMarket, IRentalMarket721 {
             rentOffer.nft,
             msg.sender,
             rentOffer.maker,
-            rentExpiry,
+            SafeCast.toUint64(rentExpiry),
             durationId
         );
 

@@ -29,14 +29,14 @@ abstract contract BaseBank721 is Bank, IBank721 {
         NFT calldata nft,
         address lender,
         address renter,
-        uint256 expiry,
-        uint256 durationId
+        uint64 expiry,
+        uint64 durationId
     ) external virtual onlyMarket {
         _updateDuration(nft, durationId, lender, expiry + 1);
         _setUser(nft, renter, expiry);
     }
 
-    function claimUser(NFT calldata nft, uint256 durationId) virtual external {
+    function claimUser(NFT calldata nft, uint64 durationId) virtual external {
         require(durationId > block.timestamp, "invalid durationId");
         bytes32 key = _getDurationKey(nft, durationId);
         require(durations[key].start > 0, "non-existed duration");
@@ -51,7 +51,7 @@ abstract contract BaseBank721 is Bank, IBank721 {
     function _setUser(
         NFT calldata nft,
         address user,
-        uint256 expiry
+        uint64 expiry
     ) internal virtual {}
 
     function userInfoOf(
@@ -62,21 +62,21 @@ abstract contract BaseBank721 is Bank, IBank721 {
 
     function _getDurationKey(
         NFT calldata nft,
-        uint256 durationId
+        uint64 durationId
     ) internal pure returns (bytes32 key) {
         key = keccak256(abi.encode(nft.token, nft.tokenId, durationId));
     }
 
     function _updateDuration(
         NFT calldata nft,
-        uint256 durationId,
+        uint64 durationId,
         address lender,
-        uint256 start
+        uint64 start
     ) internal returns (bytes32 key) {
         require(durationId > block.timestamp, "invalid durationId");
         key = _getDurationKey(nft, durationId);
         if (durations[key].start == 0) {
-            if (durationId == type(uint256).max) {
+            if (durationId == type(uint64).max) {
                 tryStakeNFT721(nft.tokenType, nft.token, nft.tokenId, lender);
             } else {
                 (address user, uint256 userExpires) = userInfoOf(

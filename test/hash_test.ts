@@ -46,7 +46,7 @@
 //             maxRentExpiry: 999999999990,
 //             nonce: 0,
 //             salt: 0,
-//             durationId: ethers.constants.MaxUint256,
+//             durationId: MaxUint64,
 //             fees: [{ rate: 100, recipient: recipientOfFee.address }],
 //             metadata: metadata
 //         }

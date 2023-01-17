@@ -1,7 +1,7 @@
 import { assert, expect } from "chai";
 import { ethers, upgrades } from "hardhat";
 import type { BigNumber, Signature, Wallet } from "ethers";
-import { NFT, RentalPrice, LendOrder, RentOffer, TokenType, ISignature, SignatureVersion, Metadata, IRentingRecord } from "./IStructs";
+import { NFT, RentalPrice, LendOrder, RentOffer, TokenType, ISignature, SignatureVersion, Metadata, IRentingRecord, MaxUint64 } from "./IStructs";
 import { types_rentOffer, types_lendOrder } from "./types";
 import { domain } from "process";
 import hre from "hardhat";
@@ -104,7 +104,7 @@ describe("TestMarket 5006", function () {
                 maxRentExpiry: maxRentExpiry,
                 nonce: 0,
                 salt: 0,
-                durationId: ethers.constants.MaxUint256,
+                durationId: MaxUint64,
                 fees: [{ rate: 100, recipient: ownerOfMarket.address }],
                 metadata: metadata
             }

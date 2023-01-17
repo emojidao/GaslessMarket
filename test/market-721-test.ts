@@ -1,7 +1,7 @@
 import { assert, expect } from "chai";
 import { ethers, upgrades } from "hardhat";
 import { BigNumber, providers, Signature, Wallet } from "ethers";
-import { NFT, RentalPrice, LendOrder, RentOffer, TokenType, ISignature, SignatureVersion, Metadata } from "./IStructs";
+import { NFT, RentalPrice, LendOrder, RentOffer, TokenType, ISignature, SignatureVersion, Metadata, MaxUint64 } from "./IStructs";
 import { types_rentOffer, types_lendOrder } from "./types";
 import { domain } from "process";
 import hre from "hardhat";
@@ -117,7 +117,7 @@ describe("TestMarket 721", function () {
                 maxRentExpiry: maxRentExpiry,
                 nonce: 0,
                 salt: 0,
-                durationId: ethers.constants.MaxUint256,
+                durationId: MaxUint64,
                 fees: [{ rate: 100, recipient: ownerOfMarket.address }],
                 metadata: metadata
             }
@@ -196,7 +196,7 @@ describe("TestMarket 721", function () {
             await bank.connect(renterA).claimUser(nft, data[1]);
 
             await hre.network.provider.send("hardhat_mine", ["0x15180", "0xb"]);//86400 * 10
-            await bank.connect(ownerOfNFT).claimUser(nft, ethers.constants.MaxUint256);
+            await bank.connect(ownerOfNFT).claimUser(nft, MaxUint64);
         });
         it("fulfillLendOrder721 should failed if struct is signed by other", async function () {
             let flatSig_other = await other._signTypedData(domain, types_lendOrder, lendOrder);
@@ -436,7 +436,7 @@ describe("TestMarket 721", function () {
                 signature: sig.compact,
                 signatureVersion: SignatureVersion.EIP712
             }
-            receipt = await market.connect(ownerOfNFT).fulfillRentOffer721(rentOffer_A, iSig, ethers.constants.MaxUint256);
+            receipt = await market.connect(ownerOfNFT).fulfillRentOffer721(rentOffer_A, iSig, MaxUint64);
 
             let data_renterA = await bank.userInfoOf(TokenType.ERC721, testERC721.address, firstTokenId);
             console.log('user', data_renterA[0]);
@@ -471,7 +471,7 @@ describe("TestMarket 721", function () {
                 signature: sig.compact,
                 signatureVersion: SignatureVersion.EIP712
             }
-            receipt = await market.connect(ownerOfNFT).fulfillRentOffer721(rentOffer_A, iSig, ethers.constants.MaxUint256);
+            receipt = await market.connect(ownerOfNFT).fulfillRentOffer721(rentOffer_A, iSig, MaxUint64);
 
             let flatSig_renterB = await renterB._signTypedData(domain, types_rentOffer, rentOffer_B);
             let addr_sublet = ethers.utils.verifyTypedData(domain, types_rentOffer, rentOffer_B, flatSig_renterB);
@@ -482,7 +482,7 @@ describe("TestMarket 721", function () {
                 signatureVersion: SignatureVersion.EIP712
             }
 
-            await expect(market.connect(ownerOfNFT).fulfillRentOffer721(rentOffer_B, iSig, ethers.constants.MaxUint256)).to.be.revertedWith("invalid duration start");
+            await expect(market.connect(ownerOfNFT).fulfillRentOffer721(rentOffer_B, iSig, MaxUint64)).to.be.revertedWith("invalid duration start");
 
         });
 
@@ -495,8 +495,8 @@ describe("TestMarket 721", function () {
                 signature: sig.compact,
                 signatureVersion: SignatureVersion.EIP712
             }
-            receipt = await market.connect(ownerOfNFT).fulfillRentOffer721(rentOffer_A, iSig, ethers.constants.MaxUint256);
-            await expect(market.connect(ownerOfNFT).fulfillRentOffer721(rentOffer_A, iSig, ethers.constants.MaxUint256)).to.be.revertedWith("Be cancelled or fulfilled already");
+            receipt = await market.connect(ownerOfNFT).fulfillRentOffer721(rentOffer_A, iSig, MaxUint64);
+            await expect(market.connect(ownerOfNFT).fulfillRentOffer721(rentOffer_A, iSig, MaxUint64)).to.be.revertedWith("Be cancelled or fulfilled already");
         });
 
         it("fulfillRentOffer721 should failed if RentOffer be canceled", async function () {
@@ -510,7 +510,7 @@ describe("TestMarket 721", function () {
             }
             let offerHash = typedDataEncoder_rentOffer.hashStruct('RentOffer', rentOffer_A);
             await market.connect(renterA).cancelRentOffer(rentOffer_A);
-            await expect(market.connect(ownerOfNFT).fulfillRentOffer721(rentOffer_A, iSig, ethers.constants.MaxUint256)).to.be.revertedWith("Be cancelled or fulfilled already");
+            await expect(market.connect(ownerOfNFT).fulfillRentOffer721(rentOffer_A, iSig, MaxUint64)).to.be.revertedWith("Be cancelled or fulfilled already");
 
         });
 
@@ -521,7 +521,7 @@ describe("TestMarket 721", function () {
                 signature: sig.compact,
                 signatureVersion: SignatureVersion.EIP712
             }
-            await expect(market.connect(ownerOfNFT).fulfillRentOffer721(rentOffer_A, iSig_by_other, ethers.constants.MaxUint256)).to.be.reverted;
+            await expect(market.connect(ownerOfNFT).fulfillRentOffer721(rentOffer_A, iSig_by_other, MaxUint64)).to.be.reverted;
 
         });
 
@@ -535,7 +535,7 @@ describe("TestMarket 721", function () {
                 signature: sig.compact,
                 signatureVersion: SignatureVersion.EIP712
             }
-            await expect(market.connect(ownerOfNFT).fulfillRentOffer721(rentOffer_B, iSig, ethers.constants.MaxUint256)).to.be.revertedWith("ERC20: transfer amount exceeds balance");
+            await expect(market.connect(ownerOfNFT).fulfillRentOffer721(rentOffer_B, iSig, MaxUint64)).to.be.revertedWith("ERC20: transfer amount exceeds balance");
 
         });
         it("fulfillRentOffer721 should failed if renter don't approve enough ERC20", async function () {
@@ -549,7 +549,7 @@ describe("TestMarket 721", function () {
                 signature: sig.compact,
                 signatureVersion: SignatureVersion.EIP712
             }
-            await expect(market.connect(ownerOfNFT).fulfillRentOffer721(rentOffer_B, iSig, ethers.constants.MaxUint256)).to.be.revertedWith("ERC20: insufficient allowance");
+            await expect(market.connect(ownerOfNFT).fulfillRentOffer721(rentOffer_B, iSig, MaxUint64)).to.be.revertedWith("ERC20: insufficient allowance");
         });
 
         it("fulfillRentOffer721 should failed if lender don't own target NFT", async function () {
@@ -563,7 +563,7 @@ describe("TestMarket 721", function () {
                 signature: sig.compact,
                 signatureVersion: SignatureVersion.EIP712
             }
-            await expect(market.connect(ownerOfNFT).fulfillRentOffer721(rentOffer_A, iSig, ethers.constants.MaxUint256)).to.be.revertedWith("ERC721: invalid token ID");
+            await expect(market.connect(ownerOfNFT).fulfillRentOffer721(rentOffer_A, iSig, MaxUint64)).to.be.revertedWith("ERC721: invalid token ID");
 
         });
 
@@ -583,7 +583,7 @@ describe("TestMarket 721", function () {
                 maxRentExpiry: maxRentExpiry,
                 nonce: 0,
                 salt: 0,
-                durationId: ethers.constants.MaxUint256,
+                durationId: MaxUint64,
                 fees: [{ rate: 100, recipient: ownerOfMarket.address }],
                 metadata: metadata
             }
@@ -633,7 +633,7 @@ describe("TestMarket 721", function () {
                 maxRentExpiry: maxRentExpiry,
                 nonce: 0,
                 salt: 0,
-                durationId: ethers.constants.MaxUint256,
+                durationId: MaxUint64,
                 fees: [{ rate: 100, recipient: ownerOfMarket.address }],
                 metadata: metadata
             }
@@ -683,7 +683,7 @@ describe("TestMarket 721", function () {
                 signature: sig.compact,
                 signatureVersion: SignatureVersion.EIP712
             }
-            await expect(market.connect(ownerOfNFT).fulfillRentOffer721(rentOffer_A, iSig, ethers.constants.MaxUint256)).to.be.revertedWith("nonce already expired");
+            await expect(market.connect(ownerOfNFT).fulfillRentOffer721(rentOffer_A, iSig, MaxUint64)).to.be.revertedWith("nonce already expired");
 
         });
 

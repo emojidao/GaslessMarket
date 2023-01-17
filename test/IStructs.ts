@@ -1,3 +1,5 @@
+import { BigNumber } from "ethers";
+
 export enum TokenType {
     NATIVE,
     ERC20,
@@ -72,3 +74,4 @@ export interface IRentingRecord {
     recordId;
 }
 
+export const MaxUint64 = BigNumber.from("18446744073709551615");

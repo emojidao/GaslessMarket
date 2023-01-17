@@ -38,7 +38,8 @@ contract BankDCL is OwnableUpgradeable, BaseBank721 {
         address oNFT,
         uint256 oNFTId
     ) public virtual override {
-        bytes32 key = keccak256(abi.encode(oNFT, oNFTId, type(uint256).max));
+        bytes32 key = keccak256(abi.encode(oNFT, oNFTId, type(uint64).max));
+        require(durations[key].owner == msg.sender, "only owner");
         require(durations[key].start < block.timestamp, "cannot redeem now");
         IERC721(oNFT).transferFrom(address(this), staked[oNFT][oNFTId], oNFTId);
         delete staked[oNFT][oNFTId];
@@ -48,13 +49,10 @@ contract BankDCL is OwnableUpgradeable, BaseBank721 {
     function _setUser(
         NFT calldata nft,
         address user,
-        uint256 expiry
+        uint64 expiry
     ) internal virtual override {
         IDCL(nft.token).setUpdateOperator(nft.tokenId, user);
-        checkInMap[nft.token][nft.tokenId] = CheckInData(
-            user,
-            SafeCast.toUint64(expiry)
-        );
+        checkInMap[nft.token][nft.tokenId] = CheckInData(user, expiry);
     }
 
     function isExpired(

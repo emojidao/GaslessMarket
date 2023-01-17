@@ -87,7 +87,7 @@ export const types_lendOrder = {
         },
         {
             "name": "durationId",
-            "type": "uint256"
+            "type": "uint64"
         },
         {
             "name": "fees",

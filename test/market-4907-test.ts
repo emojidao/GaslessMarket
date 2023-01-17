@@ -1,7 +1,7 @@
 import { assert, expect } from "chai";
 import { ethers, upgrades } from "hardhat";
 import type { BigNumber, Signature, Wallet } from "ethers";
-import { NFT, RentalPrice, LendOrder, RentOffer, TokenType, ISignature, SignatureVersion, Metadata } from "./IStructs";
+import { NFT, RentalPrice, LendOrder, RentOffer, TokenType, ISignature, SignatureVersion, Metadata, MaxUint64 } from "./IStructs";
 import { types_rentOffer, types_lendOrder } from "./types";
 import { domain } from "process";
 import hre from "hardhat";
@@ -43,11 +43,11 @@ describe("TestMarket 4907", function () {
         metadataChecker721 = await MetadataChecker721.deploy();
 
         const Bank721 = await ethers.getContractFactory("Bank721");
-        bank = await upgrades.deployProxy(Bank721, [ownerOfMarket.address, adminOfMarket.address, w4907.address], { unsafeAllow: ['delegatecall','constructor'] });
+        bank = await upgrades.deployProxy(Bank721, [ownerOfMarket.address, adminOfMarket.address, w4907.address], { unsafeAllow: ['delegatecall', 'constructor'] });
 
         const RentalMarket721 = await ethers.getContractFactory("RentalMarket721");
         market = await RentalMarket721.deploy();
-        market = await upgrades.deployProxy(RentalMarket721, [ownerOfMarket.address, adminOfMarket.address, bank.address], { unsafeAllow: ['delegatecall','constructor'] });
+        market = await upgrades.deployProxy(RentalMarket721, [ownerOfMarket.address, adminOfMarket.address, bank.address], { unsafeAllow: ['delegatecall', 'constructor'] });
 
         const TestERC4907 = await ethers.getContractFactory("TestERC4907");
         testERC4907 = await TestERC4907.deploy();
@@ -93,7 +93,7 @@ describe("TestMarket 4907", function () {
             maxRentExpiry: maxRentExpiry,
             nonce: 0,
             salt: 0,
-            durationId: ethers.constants.MaxUint256,
+            durationId: MaxUint64,
             fees: [{ rate: 100, recipient: ownerOfMarket.address }],
             metadata: metadata
         }
@@ -190,7 +190,7 @@ describe("TestMarket 4907", function () {
                 maxRentExpiry: maxRentExpiry,
                 nonce: 0,
                 salt: 0,
-                durationId: ethers.constants.MaxUint256,
+                durationId: MaxUint64,
                 fees: [{ rate: 100, recipient: ownerOfMarket.address }],
                 metadata: metadata
             }
@@ -220,6 +220,10 @@ describe("TestMarket 4907", function () {
             await hre.network.provider.send("hardhat_mine", ["0x15180", "0xa0"]);//86400 * 10
             await bank.connect(ownerOfNFT).redeemNFT721(TokenType.ERC4907, testERC4907.address, firstTokenId);
             expect(await testERC4907.ownerOf(firstTokenId)).equal(ownerOfNFT.address);
+        });
+        it("redeem should success if msg.sender is not owner of duration", async function () {
+            await hre.network.provider.send("hardhat_mine", ["0x15180", "0xa0"]);//86400 * 10
+            await expect(bank.connect(other).redeemNFT721(TokenType.ERC4907, testERC4907.address, firstTokenId)).to.be.revertedWith("only owner");
         });
         it("redeem should failed if user isn't expired", async function () {
             await expect(bank.connect(ownerOfNFT).redeemNFT721(TokenType.ERC4907, testERC4907.address, firstTokenId)).to.be.revertedWith("cannot redeem now");

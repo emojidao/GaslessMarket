@@ -7,7 +7,7 @@ import {NFT} from "../constant/BaseStructs.sol";
 
 interface IBank721 {
     struct Duration {
-        uint40 start;
+        uint64 start;
         address owner;
     }
 
@@ -37,9 +37,9 @@ interface IBank721 {
         NFT calldata nft,
         address owner,
         address user,
-        uint256 expiry,
-        uint256 durationId
+        uint64 expiry,
+        uint64 durationId
     ) external;
 
-    function claimUser(NFT calldata nft, uint256 durationId) external;
+    function claimUser(NFT calldata nft, uint64 durationId) external;
 }

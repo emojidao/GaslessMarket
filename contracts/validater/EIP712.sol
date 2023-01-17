@@ -33,7 +33,7 @@ contract EIP712 is SignatureVerificationErrors {
 
     bytes32 internal constant LEND_ORDER_TYPEHASH =
         keccak256(
-            "LendOrder(address maker,address taker,NFT nft,RentalPrice price,uint256 minCycleAmount,uint256 maxRentExpiry,uint256 nonce,uint256 salt,uint256 durationId,Fee[] fees,Metadata metadata)Fee(uint16 rate,address recipient)Metadata(bytes32 metadataHash,address checker)NFT(uint8 tokenType,address token,uint256 tokenId,uint256 amount)RentalPrice(address paymentToken,uint256 pricePerCycle,uint256 cycle)"
+            "LendOrder(address maker,address taker,NFT nft,RentalPrice price,uint256 minCycleAmount,uint256 maxRentExpiry,uint256 nonce,uint256 salt,uint64 durationId,Fee[] fees,Metadata metadata)Fee(uint16 rate,address recipient)Metadata(bytes32 metadataHash,address checker)NFT(uint8 tokenType,address token,uint256 tokenId,uint256 amount)RentalPrice(address paymentToken,uint256 pricePerCycle,uint256 cycle)"
         );
     bytes32 internal constant RENT_OFFER_TYPEHASH =
         keccak256(
