@@ -34,6 +34,9 @@ contract Bank1155 is Bank, W5006Factory, ERC1155Receiver, IBank1155 {
             addr5006 = oNFT;
         } else if (tokenType == TokenType.ERC1155) {
             addr5006 = oNFT_w5006[oNFT];
+            if (addr5006 == address(0)) {
+                revert("w5006 is not deployed");
+            }
         } else {
             revert("invalid token type");
         }
