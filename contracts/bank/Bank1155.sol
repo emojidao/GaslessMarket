@@ -132,7 +132,7 @@ contract Bank1155 is Bank, W5006Factory, ERC1155Receiver, IBank1155 {
             IERC5006(addr5006).deleteUserRecord(param.recordId);
             IERC1155(param.oNFT).safeTransferFrom(
                 address(this),
-                record.owner,
+                param.lender,
                 record.tokenId,
                 record.amount,
                 ""

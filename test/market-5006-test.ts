@@ -45,14 +45,14 @@ describe("TestMarket 5006", function () {
         let w5006Impl = await WrappedInERC5006.deploy();
 
         const Bank1155 = await ethers.getContractFactory("Bank1155");
-        bank = await upgrades.deployProxy(Bank1155, [ownerOfMarket.address, adminOfMarket.address, w5006Impl.address], { unsafeAllow: ['delegatecall','constructor'] });
+        bank = await upgrades.deployProxy(Bank1155, [ownerOfMarket.address, adminOfMarket.address, w5006Impl.address], { unsafeAllow: ['delegatecall', 'constructor'] });
 
         const RentalMarket1155 = await ethers.getContractFactory("RentalMarket1155");
         market = await RentalMarket1155.deploy();
-        market = await upgrades.deployProxy(RentalMarket1155, [ownerOfMarket.address, adminOfMarket.address, bank.address], { unsafeAllow: ['delegatecall','constructor'] });
+        market = await upgrades.deployProxy(RentalMarket1155, [ownerOfMarket.address, adminOfMarket.address, bank.address], { unsafeAllow: ['delegatecall', 'constructor'] });
 
         const TestERC5006 = await ethers.getContractFactory("TestERC5006");
-        testERC5006 = await TestERC5006.deploy('',64);
+        testERC5006 = await TestERC5006.deploy('', 64);
 
 
         await testERC5006.mint(ownerOfNFT.address, firstTokenId, 100)
@@ -157,10 +157,25 @@ describe("TestMarket 5006", function () {
             })
 
             if (lendOrder.price.paymentToken == ethers.constants.AddressZero) {
-                receipt = await market.connect(renterB).fulfillLendOrder1155(lendOrder, iSig, 10, 1, toDeletes, { value: ethers.utils.parseEther('10') });
+                receipt = await market.connect(renterB).fulfillLendOrder1155(lendOrder, iSig, 1, 1, toDeletes, { value: ethers.utils.parseEther('10') });
             } else {
-                receipt = await market.connect(renterB).fulfillLendOrder1155(lendOrder, iSig, 10, 1, toDeletes);
+                receipt = await market.connect(renterB).fulfillLendOrder1155(lendOrder, iSig, 1, 1, toDeletes);
             }
+
+            expect(await testERC5006.balanceOf(ownerOfNFT.address, 1)).equal(99, "balance error");
+
+            await hre.network.provider.send("hardhat_mine", ["0x15180", "0x1"]);//86400 * 1
+
+            toDeletes.push({
+                tokenType: TokenType.ERC5006,
+                oNFT: testERC5006.address,
+                oNFTId: firstTokenId,
+                recordId: 2,
+                lender: ownerOfNFT.address
+            })
+
+            await bank.deleteUserRecords(toDeletes);
+            expect(await testERC5006.balanceOf(ownerOfNFT.address, 1)).equal(100, "balance error");
 
         });
 
@@ -247,6 +262,9 @@ describe("TestMarket 5006", function () {
                 lender: ownerOfNFT.address
             })
             receipt = await market.connect(ownerOfNFT).fulfillRentOffer1155(rentOffer_B, iSig, toDeletes);
+
+
+
 
 
         });
