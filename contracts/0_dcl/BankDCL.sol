@@ -37,7 +37,7 @@ contract BankDCL is OwnableUpgradeable, BaseBank721 {
         TokenType tokenType,
         address oNFT,
         uint256 oNFTId
-    ) public virtual override {
+    ) public virtual override nonReentrant{
         bytes32 key = keccak256(abi.encode(oNFT, oNFTId, type(uint64).max));
         require(durations[key].owner == msg.sender, "only owner");
         require(durations[key].start < block.timestamp, "cannot redeem now");

@@ -30,7 +30,7 @@ contract RentalMarket721 is BaseRentalMarket, IRentalMarket721 {
         LendOrder calldata lendOrder,
         Signature calldata signature,
         uint256 cycleAmount
-    ) external payable whenNotPaused {
+    ) external payable whenNotPaused nonReentrant {
         require(cycleAmount >= lendOrder.minCycleAmount, "invalid cycleAmount");
         bytes32 orderHash = _hashStruct_LendOrder(lendOrder);
         _validateOrder(
@@ -79,7 +79,7 @@ contract RentalMarket721 is BaseRentalMarket, IRentalMarket721 {
         RentOffer calldata rentOffer,
         Signature calldata signature,
         uint64 durationId
-    ) public whenNotPaused {
+    ) public whenNotPaused nonReentrant {
         bytes32 offerHash = _hashStruct_RentOffer(rentOffer);
         _validateOrder(
             rentOffer.maker,

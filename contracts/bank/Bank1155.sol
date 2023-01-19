@@ -152,7 +152,7 @@ contract Bank1155 is Bank, W5006Factory, ERC1155Receiver, IBank1155 {
         emit DeleteUserRecord(param);
     }
 
-    function deleteUserRecords(RentingRecord[] calldata toDeletes) external {
+    function deleteUserRecords(RentingRecord[] calldata toDeletes) external nonReentrant{
         for (uint256 i = 0; i < toDeletes.length; i++) {
             _deleteUserRecord(toDeletes[i]);
         }

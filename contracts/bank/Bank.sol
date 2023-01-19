@@ -1,11 +1,12 @@
 // SPDX-License-Identifier: MIT
 
 pragma solidity ^0.8.0;
-import "@openzeppelin/contracts/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 import "@openzeppelin/contracts/utils/math/SafeCast.sol";
+import "@openzeppelin/contracts/utils/Multicall.sol";
 import "./IBank.sol";
 
-abstract contract Bank is Initializable, IBank {
+abstract contract Bank is ReentrancyGuardUpgradeable, IBank {
     address public market;
     uint256[64] private __gap;
 
