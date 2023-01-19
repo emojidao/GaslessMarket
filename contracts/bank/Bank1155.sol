@@ -11,7 +11,7 @@ contract Bank1155 is Bank, W5006Factory, ERC1155Receiver, IBank1155 {
     //               total amount
     mapping(bytes32 => uint256) internal frozenAmountMap;
     //                  amount
-    mapping(bytes32 => uint256) internal rentingMap;
+    mapping(bytes32 => Renting) internal rentingMap;
 
     constructor() {
         _disableInitializers();
@@ -103,7 +103,7 @@ contract Bank1155 is Bank, W5006Factory, ERC1155Receiver, IBank1155 {
             param.owner,
             recordId
         );
-        rentingMap[rentingKey] = param.oNFTAmount;
+        rentingMap[rentingKey] = Renting(param.owner, param.oNFTAmount);
         bytes32 fkey = _frozenKey(param.oNFT, param.oNFTId, param.owner);
         frozenAmountMap[fkey] += param.oNFTAmount;
         emit CreateUserRecord(param);
@@ -122,7 +122,14 @@ contract Bank1155 is Bank, W5006Factory, ERC1155Receiver, IBank1155 {
             param.lender,
             param.recordId
         );
-        require(rentingMap[rentingKey] == record.amount, "invalid amount");
+        require(
+            rentingMap[rentingKey].lender == param.lender,
+            "invalid lender"
+        );
+        require(
+            rentingMap[rentingKey].amount == record.amount,
+            "invalid amount"
+        );
         if (param.tokenType == TokenType.ERC1155) {
             IWrappedInERC5006(addr5006).redeemRecord(
                 param.recordId,

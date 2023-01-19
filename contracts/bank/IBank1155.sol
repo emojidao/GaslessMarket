@@ -25,6 +25,11 @@ interface IBank1155 {
         uint256 recordId;
     }
 
+    struct Renting{
+        address lender;
+        uint256 amount;
+    }
+
     event CreateUserRecord(RecordParam param);
 
     event DeleteUserRecord(RentingRecord param);
