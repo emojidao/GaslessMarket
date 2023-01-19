@@ -10,7 +10,7 @@ import "./W5006Factory.sol";
 contract Bank1155 is Bank, W5006Factory, ERC1155Receiver, IBank1155 {
     //               total amount
     mapping(bytes32 => uint256) internal frozenAmountMap;
-    //                  amount
+    //                  lender & amount
     mapping(bytes32 => Renting) internal rentingMap;
 
     constructor() {
