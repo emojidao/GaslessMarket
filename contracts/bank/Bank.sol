@@ -16,8 +16,11 @@ abstract contract Bank is ReentrancyGuardUpgradeable, IBank {
     }
 
     function bindMarket(address market_) external {
-        require(market == address(0), "market was bind");
-        require(market_ != address(0), "market cannot be Zero Address");
-        market = market_;
+        require(market_ != address(0), "market_ cannot be Zero Address");
+        if (market == address(0)) {
+            market = market_;
+        } else {
+            require(market == market_, "market was bind");
+        }
     }
 }
