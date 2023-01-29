@@ -1071,12 +1071,12 @@ contract LANDRegistry is Storage, Ownable, FullAssetRegistry, ILANDRegistry, Own
   //
 
   function assignNewParcel(int x, int y, address beneficiary) external {
-    require(whiteListMap[msg.sender], "not a whitelist user.");
+    // require(whiteListMap[msg.sender], "not a whitelist user.");
     _generate(_encodeTokenId(x, y), beneficiary);
   }
 
   function assignMultipleParcels(int[] x, int[] y, address beneficiary) external {
-    require(whiteListMap[msg.sender], "not a whitelist user.");
+    // require(whiteListMap[msg.sender], "not a whitelist user.");
     for (uint i = 0; i < x.length; i++) {
       _generate(_encodeTokenId(x[i], y[i]), beneficiary);
     }
