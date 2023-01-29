@@ -51,7 +51,6 @@ describe("TestMarket 721", function () {
         bank = await upgrades.deployProxy(Bank721, [ownerOfMarket.address, adminOfMarket.address, w4907.address], { unsafeAllow: ['delegatecall', 'constructor'] });
 
         const RentalMarket721 = await ethers.getContractFactory("RentalMarket721");
-        market = await RentalMarket721.deploy();
         market = await upgrades.deployProxy(RentalMarket721, [ownerOfMarket.address, adminOfMarket.address, bank.address], { unsafeAllow: ['delegatecall', 'constructor'] });
 
         const TestERC721 = await ethers.getContractFactory("TestERC721");
