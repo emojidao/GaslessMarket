@@ -125,7 +125,7 @@ contract RentalMarket721 is BaseRentalMarket, IRentalMarket721 {
         );
     }
 
-    function redeemAndCancleLendOrder(LendOrder calldata lendOrder) public {
+    function redeemAndCancelLendOrder(LendOrder calldata lendOrder) public {
         cancelLendOrder(lendOrder);
         IBank721(bankOf(lendOrder.nft.token)).redeemNFT721(
             lendOrder.nft.tokenType,
