@@ -39,7 +39,7 @@ contract BankDCL is OwnableUpgradeable, BaseBank721 {
         uint256 oNFTId
     ) public virtual override nonReentrant{
         bytes32 key = keccak256(abi.encode(oNFT, oNFTId, type(uint64).max));
-        require(durations[key].owner == msg.sender, "only owner");
+        require(msg.sender == durations[key].owner || msg.sender == market, "only owner or market");
         require(durations[key].start < block.timestamp, "cannot redeem now");
         IERC721(oNFT).transferFrom(address(this), staked[oNFT][oNFTId], oNFTId);
         delete staked[oNFT][oNFTId];

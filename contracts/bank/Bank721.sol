@@ -46,7 +46,7 @@ contract Bank721 is BaseBank721, W4907Factory {
         uint256 oNFTId
     ) public virtual override nonReentrant {
         bytes32 key = keccak256(abi.encode(oNFT, oNFTId, type(uint64).max));
-        require(durations[key].owner == msg.sender, "only owner");
+        require(msg.sender == durations[key].owner || msg.sender == market, "only owner or market");
         require(durations[key].start < block.timestamp, "cannot redeem now");
         if (tokenType == TokenType.ERC721) {
             address w4907 = oNFT_w4907[oNFT];
