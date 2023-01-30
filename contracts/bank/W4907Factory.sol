@@ -85,11 +85,11 @@ abstract contract W4907Factory is OwnableUpgradeable {
     ) internal view returns (string memory name, string memory symbol) {
         IERC721Metadata nft = IERC721Metadata(oNFT);
         try nft.name() returns (string memory _name) {
-            name = string(abi.encode("Wrap-", _name));
+            name = string(abi.encodePacked("Wrap-", _name));
         } catch {}
 
         try nft.symbol() returns (string memory _symbol) {
-            symbol = string(abi.encode("W-", _symbol));
+            symbol = string(abi.encodePacked("W-", _symbol));
         } catch {}
     }
 
