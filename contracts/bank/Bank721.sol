@@ -46,7 +46,10 @@ contract Bank721 is BaseBank721, W4907Factory {
         uint256 oNFTId
     ) public virtual override nonReentrant {
         bytes32 key = keccak256(abi.encode(oNFT, oNFTId, type(uint64).max));
-        require(msg.sender == durations[key].owner || msg.sender == market, "only owner or market");
+        require(
+            msg.sender == durations[key].owner || msg.sender == market,
+            "only owner or market"
+        );
         require(durations[key].start < block.timestamp, "cannot redeem now");
         if (tokenType == TokenType.ERC721) {
             address w4907 = oNFT_w4907[oNFT];
@@ -75,17 +78,9 @@ contract Bank721 is BaseBank721, W4907Factory {
         if (nft.tokenType == TokenType.ERC721) {
             address w4907 = oNFT_w4907[nft.token];
             require(w4907 != address(0), "wNFT is not deployed yet");
-            IERC4907(w4907).setUser(
-                nft.tokenId,
-                user,
-                SafeCast.toUint64(expiry)
-            );
+            IERC4907(w4907).setUser(nft.tokenId, user, expiry);
         } else if (nft.tokenType == TokenType.ERC4907) {
-            IERC4907(nft.token).setUser(
-                nft.tokenId,
-                user,
-                SafeCast.toUint64(expiry)
-            );
+            IERC4907(nft.token).setUser(nft.tokenId, user, expiry);
         } else {
             revert("invalid token type");
         }
