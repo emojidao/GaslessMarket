@@ -61,6 +61,7 @@ abstract contract W5006Factory is OwnableUpgradeable {
             "invalid oNFT"
         );
         oNFT_w5006[oNFT] = w5006;
+        IERC1155(oNFT).setApprovalForAll(w5006, true);
     }
 
     function w5006Of(address oNFT) public view returns (address) {
