@@ -595,6 +595,58 @@ describe("TestMarket 721 DCL", function () {
         });
     });
 
+    describe('resetExpiredTo', function () {
+        let rentalPrice_ERC20;
+        beforeEach(async function () {
+            rentalPrice_ERC20 = { paymentToken: erc20.address, pricePerCycle: ethers.utils.parseEther('1'), cycle: 86400 }
+            lendOrder = {
+                maker: ownerOfNFT.address,
+                taker: ethers.constants.AddressZero,
+                nft: nft,
+                price: rentalPrice_ERC20,
+                minCycleAmount: 1,
+                maxRentExpiry: maxRentExpiry,
+                nonce: 0,
+                salt: 0,
+                durationId: MaxUint64,
+                fees: [{ rate: 100, recipient: ownerOfMarket.address }],
+                metadata: metadata
+            }
+
+            erc20.mint(renterA.address, ethers.utils.parseEther('100'));
+            erc20.mint(renterB.address, ethers.utils.parseEther('1'));
+
+            erc20.connect(renterA).approve(market.address, ethers.utils.parseEther('100'));
+            erc20.connect(renterB).approve(market.address, ethers.utils.parseEther('100'));
+
+            let flatSig = await ownerOfNFT._signTypedData(domain, types_lendOrder, lendOrder);
+            let addr = ethers.utils.verifyTypedData(domain, types_lendOrder, lendOrder, flatSig);
+            expect(addr).equal(ownerOfNFT.address)
+            sig = ethers.utils.splitSignature(flatSig);
+            iSig = {
+                signature: sig.compact,
+                signatureVersion: SignatureVersion.EIP712
+            }
+            if (lendOrder.price.paymentToken == ethers.constants.AddressZero) {
+                receipt = await market.connect(renterA).fulfillLendOrder721(lendOrder, iSig, 10, { value: ethers.utils.parseEther('10') });
+            } else {
+                receipt = await market.connect(renterA).fulfillLendOrder721(lendOrder, iSig, 10);
+            }
+        });
+
+        it("resetExpiredTo should success if user is expired", async function () {
+            await hre.network.provider.send("hardhat_mine", ["0x15180", "0xb"]);//86400 * 11
+            await bank_dcl.connect(ownerOfMarket).resetExpiredTo([testERC721.address], [firstTokenId],ethers.constants.AddressZero);
+            let checkInOf = await bank_dcl.checkInOf(testERC721.address,firstTokenId)
+            expect(await testERC721.updateOperator(firstTokenId)).equal(ethers.constants.AddressZero);
+        });
+        it("resetExpiredTo should failed if user isn't expired", async function () {
+            await bank_dcl.connect(ownerOfMarket).resetExpiredTo([testERC721.address], [firstTokenId],ethers.constants.AddressZero);
+            let checkInOf = await bank_dcl.checkInOf(testERC721.address,firstTokenId)
+            expect(await testERC721.updateOperator(firstTokenId)).equal(checkInOf[0]);
+        });
+    });
+
     describe('incrementNonce will delist all LendOrders and all RentOffers', function () {
         let rentalPrice_ERC20;
         let rentOffer_A;
