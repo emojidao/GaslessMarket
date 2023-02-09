@@ -63,10 +63,7 @@ abstract contract BaseRentalMarket is
             "only maker can cancel the order"
         );
         bytes32 orderHash = _hashStruct_LendOrder(lendOrder);
-        require(
-            !cancelledOrFulfilled[orderHash],
-            "Be cancelled or fulfilled already"
-        );
+        if(cancelledOrFulfilled[orderHash]) return;
         cancelledOrFulfilled[orderHash] = true;
         emit OrderCancelled(orderHash);
     }
@@ -77,10 +74,7 @@ abstract contract BaseRentalMarket is
             "only maker can cancel the offer"
         );
         bytes32 offerHash = _hashStruct_RentOffer(rentOffer);
-        require(
-            !cancelledOrFulfilled[offerHash],
-            "Be cancelled or fulfilled already"
-        );
+        if(cancelledOrFulfilled[offerHash]) return;
         cancelledOrFulfilled[offerHash] = true;
         emit OfferCancelled(offerHash);
     }
