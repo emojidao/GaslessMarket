@@ -647,6 +647,74 @@ describe("TestMarket 721 DCL", function () {
         });
     });
 
+    describe('Bank DCL setUpdateOperator', function () {
+        let rentalPrice_ERC20;
+        beforeEach(async function () {
+            rentalPrice_ERC20 = { paymentToken: erc20.address, pricePerCycle: ethers.utils.parseEther('1'), cycle: 86400 }
+            lendOrder = {
+                maker: ownerOfNFT.address,
+                taker: ethers.constants.AddressZero,
+                nft: nft,
+                price: rentalPrice_ERC20,
+                minCycleAmount: 1,
+                maxRentExpiry: maxRentExpiry,
+                nonce: 0,
+                salt: 0,
+                durationId: MaxUint64,
+                fees: [{ rate: 100, recipient: ownerOfMarket.address }],
+                metadata: metadata
+            }
+
+            erc20.mint(renterA.address, ethers.utils.parseEther('100'));
+            erc20.mint(renterB.address, ethers.utils.parseEther('1'));
+
+            erc20.connect(renterA).approve(market.address, ethers.utils.parseEther('100'));
+            erc20.connect(renterB).approve(market.address, ethers.utils.parseEther('100'));
+
+            let flatSig = await ownerOfNFT._signTypedData(domain, types_lendOrder, lendOrder);
+            let addr = ethers.utils.verifyTypedData(domain, types_lendOrder, lendOrder, flatSig);
+            expect(addr).equal(ownerOfNFT.address)
+            sig = ethers.utils.splitSignature(flatSig);
+            iSig = {
+                signature: sig.compact,
+                signatureVersion: SignatureVersion.EIP712
+            }
+            if (lendOrder.price.paymentToken == ethers.constants.AddressZero) {
+                receipt = await market.connect(renterA).fulfillLendOrder721(lendOrder, iSig, 10, { value: ethers.utils.parseEther('10') });
+            } else {
+                receipt = await market.connect(renterA).fulfillLendOrder721(lendOrder, iSig, 10);
+            }
+        });
+
+        it("setUpdateOperator should success if lender is valid", async function () {
+            let checkInData = await bank_dcl.checkInOf(testERC721.address, firstTokenId);
+            await bank_dcl.connect(renterA).setUpdateOperator(testERC721.address, firstTokenId, other.address, checkInData[1]);
+            expect(await testERC721.updateOperator(firstTokenId)).equal(other.address);
+        });
+
+        it("setUpdateOperator should failed if rent is expired", async function () {
+            let checkInData = await bank_dcl.checkInOf(testERC721.address, firstTokenId);
+            await hre.network.provider.send("hardhat_mine", ["0x15180", "0xb"]);//86400 * 11
+            await expect(bank_dcl.connect(renterA).setUpdateOperator(testERC721.address, firstTokenId, other.address, checkInData[1])).to.be.revertedWith("Invalid durationId");
+        });
+
+        it("setUpdateOperator should fail if duration.start > now ", async function () {
+            await expect(bank_dcl.connect(ownerOfNFT).setUpdateOperator(testERC721.address, firstTokenId, other.address, MaxUint64)).to.be.revertedWith("Invalid duration start");
+        });
+
+        it("setUpdateOperator should fail if caller is not owner of duration ", async function () {
+            await hre.network.provider.send("hardhat_mine", ["0x15180", "0xb"]);//86400 * 11
+            await expect(bank_dcl.connect(other).setUpdateOperator(testERC721.address, firstTokenId, other.address, MaxUint64)).to.be.revertedWith("Invalid caller");
+        });
+
+        it("setUpdateOperator should fail if duration is not exist ", async function () {
+            await expect(bank_dcl.connect(other).setUpdateOperator(testERC721.address, firstTokenId, other.address, 99999999999)).to.be.revertedWith("Invalid caller");
+        });
+        it("setUpdateOperator should fail if duration is not exist ", async function () {
+            await expect(bank_dcl.connect(other).setUpdateOperator(testERC721.address, firstTokenId, other.address, 99)).to.be.revertedWith("Invalid durationId");
+        });
+    });
+
     describe('incrementNonce will delist all LendOrders and all RentOffers', function () {
         let rentalPrice_ERC20;
         let rentOffer_A;

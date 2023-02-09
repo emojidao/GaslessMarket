@@ -48,17 +48,17 @@ describe("TestMarket 721 DCL", function () {
         let w4907 = await WrappedInERC4907Upgradeable.deploy();
 
         const Bank721 = await ethers.getContractFactory("Bank721");
-        let bank721 = await upgrades.deployProxy(Bank721, [ownerOfMarket.address, adminOfMarket.address, w4907.address], { unsafeAllow: ['delegatecall','constructor'] });
+        let bank721 = await upgrades.deployProxy(Bank721, [ownerOfMarket.address, adminOfMarket.address, w4907.address], { unsafeAllow: ['delegatecall', 'constructor'] });
 
         const RentalMarket721 = await ethers.getContractFactory("RentalMarket721");
         market = await RentalMarket721.deploy();
-        market = await upgrades.deployProxy(RentalMarket721, [ownerOfMarket.address, adminOfMarket.address, bank721.address], { unsafeAllow: ['delegatecall','constructor'] });
+        market = await upgrades.deployProxy(RentalMarket721, [ownerOfMarket.address, adminOfMarket.address, bank721.address], { unsafeAllow: ['delegatecall', 'constructor'] });
 
         const LANDRegistry = await ethers.getContractFactory("contracts/test/dcl/LANDRegistry.sol:LANDRegistry");
         testERC721 = await LANDRegistry.deploy();
 
         const BankDCL = await ethers.getContractFactory("BankDCL");
-        bank_dcl = await upgrades.deployProxy(BankDCL, [ownerOfMarket.address, adminOfMarket.address], { unsafeAllow: ['delegatecall','constructor'] });
+        bank_dcl = await upgrades.deployProxy(BankDCL, [ownerOfMarket.address, adminOfMarket.address], { unsafeAllow: ['delegatecall', 'constructor'] });
         await market.registerBank(testERC721.address, bank_dcl.address);
 
         firstTokenId = await testERC721._unsafeEncodeTokenId(100, 100);
@@ -582,6 +582,74 @@ describe("TestMarket 721 DCL", function () {
         });
     });
 
+    describe('Bank DCL setUpdateOperator', function () {
+        let rentalPrice_ERC20;
+        beforeEach(async function () {
+            rentalPrice_ERC20 = { paymentToken: erc20.address, pricePerCycle: ethers.utils.parseEther('1'), cycle: 86400 }
+            lendOrder = {
+                maker: ownerOfNFT.address,
+                taker: ethers.constants.AddressZero,
+                nft: nft,
+                price: rentalPrice_ERC20,
+                minCycleAmount: 1,
+                maxRentExpiry: maxRentExpiry,
+                nonce: 0,
+                salt: 0,
+                durationId: MaxUint64,
+                fees: [{ rate: 100, recipient: ownerOfMarket.address }],
+                metadata: metadata
+            }
+
+            erc20.mint(renterA.address, ethers.utils.parseEther('100'));
+            erc20.mint(renterB.address, ethers.utils.parseEther('1'));
+
+            erc20.connect(renterA).approve(market.address, ethers.utils.parseEther('100'));
+            erc20.connect(renterB).approve(market.address, ethers.utils.parseEther('100'));
+
+            let flatSig = await ownerOfNFT._signTypedData(domain, types_lendOrder, lendOrder);
+            let addr = ethers.utils.verifyTypedData(domain, types_lendOrder, lendOrder, flatSig);
+            expect(addr).equal(ownerOfNFT.address)
+            sig = ethers.utils.splitSignature(flatSig);
+            iSig = {
+                signature: sig.compact,
+                signatureVersion: SignatureVersion.EIP712
+            }
+            if (lendOrder.price.paymentToken == ethers.constants.AddressZero) {
+                receipt = await market.connect(renterA).fulfillLendOrder721(lendOrder, iSig, 10, { value: ethers.utils.parseEther('10') });
+            } else {
+                receipt = await market.connect(renterA).fulfillLendOrder721(lendOrder, iSig, 10);
+            }
+        });
+
+        it("setUpdateOperator should success if lender is valid", async function () {
+            let checkInData = await bank_dcl.checkInOf(testERC721.address, firstTokenId);
+            await bank_dcl.connect(renterA).setUpdateOperator(testERC721.address, firstTokenId, other.address, checkInData[1]);
+            expect(await testERC721.updateOperator(firstTokenId)).equal(other.address);
+        });
+
+        it("setUpdateOperator should failed if rent is expired", async function () {
+            let checkInData = await bank_dcl.checkInOf(testERC721.address, firstTokenId);
+            await hre.network.provider.send("hardhat_mine", ["0x15180", "0xb"]);//86400 * 11
+            await expect(bank_dcl.connect(renterA).setUpdateOperator(testERC721.address, firstTokenId, other.address, checkInData[1])).to.be.revertedWith("Invalid durationId");
+        });
+
+        it("setUpdateOperator should fail if duration.start > now ", async function () {
+            await expect(bank_dcl.connect(ownerOfNFT).setUpdateOperator(testERC721.address, firstTokenId, other.address, MaxUint64)).to.be.revertedWith("Invalid duration start");
+        });
+
+        it("setUpdateOperator should fail if caller is not owner of duration ", async function () {
+            await hre.network.provider.send("hardhat_mine", ["0x15180", "0xb"]);//86400 * 11
+            await expect(bank_dcl.connect(other).setUpdateOperator(testERC721.address, firstTokenId, other.address, MaxUint64)).to.be.revertedWith("Invalid caller");
+        });
+
+        it("setUpdateOperator should fail if duration is not exist ", async function () {
+            await expect(bank_dcl.connect(other).setUpdateOperator(testERC721.address, firstTokenId, other.address, 99999999999)).to.be.revertedWith("Invalid caller");
+        });
+        it("setUpdateOperator should fail if duration is not exist ", async function () {
+            await expect(bank_dcl.connect(other).setUpdateOperator(testERC721.address, firstTokenId, other.address, 99)).to.be.revertedWith("Invalid durationId");
+        });
+    });
+
     describe('resetExpiredTo', function () {
         let rentalPrice_ERC20;
         beforeEach(async function () {
@@ -623,13 +691,13 @@ describe("TestMarket 721 DCL", function () {
 
         it("resetExpiredTo should success if user is expired", async function () {
             await hre.network.provider.send("hardhat_mine", ["0x15180", "0xb"]);//86400 * 11
-            await bank_dcl.connect(ownerOfMarket).resetExpiredTo([testERC721.address], [firstTokenId],ethers.constants.AddressZero);
-            let checkInOf = await bank_dcl.checkInOf(testERC721.address,firstTokenId)
+            await bank_dcl.connect(ownerOfMarket).resetExpiredTo([testERC721.address], [firstTokenId], ethers.constants.AddressZero);
+            let checkInOf = await bank_dcl.checkInOf(testERC721.address, firstTokenId)
             expect(await testERC721.updateOperator(firstTokenId)).equal(ethers.constants.AddressZero);
         });
         it("resetExpiredTo should failed if user isn't expired", async function () {
-            await bank_dcl.connect(ownerOfMarket).resetExpiredTo([testERC721.address], [firstTokenId],ethers.constants.AddressZero);
-            let checkInOf = await bank_dcl.checkInOf(testERC721.address,firstTokenId)
+            await bank_dcl.connect(ownerOfMarket).resetExpiredTo([testERC721.address], [firstTokenId], ethers.constants.AddressZero);
+            let checkInOf = await bank_dcl.checkInOf(testERC721.address, firstTokenId)
             expect(await testERC721.updateOperator(firstTokenId)).equal(checkInOf[0]);
         });
     });
