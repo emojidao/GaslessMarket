@@ -57,7 +57,6 @@ contract BankDCL is OwnableUpgradeable, BaseBank721 {
             uint256 oNFTId = oNFTIds[index];
             if (isExpired(oNFT, oNFTId)) {
                 IDCL(oNFT).setUpdateOperator(oNFTId, to);
-                checkInMap[oNFT][oNFTId] = CheckInData(to, 0);
             }
         }
     }
