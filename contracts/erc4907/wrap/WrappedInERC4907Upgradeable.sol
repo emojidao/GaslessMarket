@@ -13,7 +13,7 @@ contract WrappedInERC4907Upgradeable is
     IWrapNFTUpgradeable
 {
     address private _originalAddress;
-    address private operator;
+    address public operator;
 
     modifier onlyOperator {
         require(msg.sender == operator,"only operator");
