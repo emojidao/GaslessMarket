@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: CC0-1.0
 pragma solidity ^0.8.0;
 import "contracts/erc4907/wrap/WrappedInERC4907Upgradeable.sol";
 import "contracts/erc5006/WrappedInERC5006.sol";
